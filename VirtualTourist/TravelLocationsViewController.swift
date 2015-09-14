@@ -9,30 +9,83 @@
 import UIKit
 import MapKit
 
-class TravelLocationsViewController: UIViewController, UIGestureRecognizerDelegate {
+class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
 
-    @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var mapView: MKMapView! {
+        didSet {
+            mapView.delegate = self
+        }
+    }
+    
+    private var lastRegion: MKCoordinateRegion?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
     }
-
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if let region = loadRegion() {
+            println("Found stored region data")
+            mapView.region = region
+        }
+    }
+    
     @IBAction func handleLongPress(sender: UILongPressGestureRecognizer) {
         if sender.state == UIGestureRecognizerState.Began {
             println("Handling `Began` state for gesture")
             let touchPoint = sender.locationInView(mapView)
             let coordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
             let annotation = MKPointAnnotation()
-            annotation.title = "New pin"
-            annotation.coordinate = coordinate //CLLocationCoordinate2D(latitude: 0, longitude: 0)
+            annotation.coordinate = coordinate
             let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "PinAnnotation")
             mapView.addAnnotation(annotation)
+            saveRegion(mapView.region)
         } else
         {
             println("Ignoring state")
         }
     }
     
-}
+    // MARK: MKMapViewDelegate
+    
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        println("didSelectAnnotationView")
+        performSegueWithIdentifier("ShowPhotoAlbumViewController", sender: self)
+    }
+    
+    private func loadRegion() -> MKCoordinateRegion? {
+        println("Attempting to load region")
+        
+        let defaults = NSUserDefaults.standardUserDefaults()
 
+        // Load the span and center from NSUserDefaults
+        let span = MKCoordinateSpanMake(defaults.doubleForKey("latitudeDelta"), defaults.doubleForKey("longitudeDelta"))
+        
+        let center = CLLocationCoordinate2DMake(defaults.doubleForKey("latitude"), defaults.doubleForKey("longitude"))
+
+        if center.latitude == 0 && center.longitude == 0 && span.latitudeDelta == 0 && span.longitudeDelta == 0 {
+            // Nothing found
+            return nil
+        }
+        
+        let region = MKCoordinateRegionMake(center, span)
+        
+        return region
+    }
+    
+    private func saveRegion(region: MKCoordinateRegion) {
+        println("Saving region")
+        let defaults = NSUserDefaults.standardUserDefaults()
+        
+        let latitude = region.center.latitude
+        let longitude = region.center.longitude
+        
+        defaults.setDouble(latitude, forKey: "latitude")
+        defaults.setDouble(longitude, forKey: "longitude")
+        defaults.setDouble(region.span.latitudeDelta, forKey: "latitudeDelta")
+        defaults.setDouble(region.span.longitudeDelta, forKey: "longitudeDelta")
+    }
+    
+}

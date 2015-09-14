@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vXZ-lx-hvc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="U6F-Ps-MfK">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
@@ -33,8 +33,10 @@
                             <constraint firstAttribute="trailingMargin" secondItem="sLc-Zr-ZxF" secondAttribute="trailing" constant="-16" id="fTc-a5-pbK"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="mSQ-SR-tMo"/>
                     <connections>
                         <outlet property="mapView" destination="sLc-Zr-ZxF" id="15h-sS-w7S"/>
+                        <segue destination="9IH-4G-LdG" kind="show" identifier="ShowPhotoAlbumViewController" id="Tao-8B-ogu"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
@@ -44,7 +46,7 @@
                     </connections>
                 </pongPressGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="371" y="403"/>
+            <point key="canvasLocation" x="1183" y="403"/>
         </scene>
         <!--Photo Album View Controller-->
         <scene sceneID="VWj-ov-tZO">
@@ -58,7 +60,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="tEF-YB-NHl">
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="tEF-YB-NHl">
                                 <rect key="frame" x="0.0" y="151" width="600" height="449"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="449" id="rZk-lQ-d4M"/>
@@ -94,7 +96,25 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bh5-lL-Bd9" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1060" y="403"/>
+            <point key="canvasLocation" x="1872" y="403"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="CLe-9d-1Rt">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="U6F-Ps-MfK" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="ieg-PI-bMh">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="vXZ-lx-hvc" kind="relationship" relationship="rootViewController" id="X4q-cd-hes"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="My7-9W-9p4" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="371" y="403"/>
         </scene>
     </scenes>
 </document>
