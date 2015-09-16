@@ -17,12 +17,29 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         }
     }
     
+    // ** For testing **
+    private var flickrClient = FlickrClient()
+    private lazy var documentsDirectory: NSURL = {
+        NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first as! NSURL
+        }()
+    
+    private lazy var photosPath: NSURL = {
+        self.documentsDirectory.URLByAppendingPathComponent("VirtualTouristPhotos/")
+        }()
+
     private var lastRegion: MKCoordinateRegion?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let lat = 0.0 //34.0500
+        let lon = 0.0 //118.25
+        
+        flickrClient.downloadImagesForLocation(lat, longitude: lon, storagePath: photosPath) { (error) -> () in
+            println("Got some imaages")
+        }
     }
-    
+
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
