@@ -6,32 +6,32 @@
 //  Copyright (c) 2015 notluS. All rights reserved.
 //
 
-import UIKit
+import CoreData
 import MapKit
+import UIKit
 
 class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
 
     @IBOutlet weak var mapView: MKMapView! {
         didSet {
+            print("Setting delegate")
             mapView.delegate = self
         }
     }
     
     // ** For testing **
-    private var flickrClient = FlickrClient()
+//    private var flickrClient = FlickrClient()
+    
     private lazy var documentsDirectory: NSURL = {
         return NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
-        }()
+    }()
     
     private lazy var photosPath: NSURL = {
         self.documentsDirectory.URLByAppendingPathComponent("VirtualTouristPhotos/")
-        }()
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        let lat = 0.0 //34.0500
-        let lon = 0.0 //118.25
         
         if (!NSFileManager.defaultManager().fileExistsAtPath(photosPath.path!)) {
         
@@ -43,9 +43,38 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
             }
         }
         
-        flickrClient.downloadImagesForLocation(lat, longitude: lon, storagePath: photosPath) { (error) -> () in
-            print("Got some imaages")
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("performFetch failed")
         }
+        
+        print("fetched \(fetchedResultsController.fetchedObjects)")
+        
+//        if let pins = fetchedResultsController.fetchedObjects as? [Pin] {
+//            for pin in pins {
+//                addAnnotation(pin)
+//            }
+//        }
+        
+//        fetchedResultsController.delegate = self
+        
+//        let lat = 0.0 //34.0500
+//        let lon = 0.0 //118.25
+       
+//        flickrClient.downloadImagesForLocation(lat, longitude: lon, storagePath: photosPath) { (error) -> () in
+//            print("Got some imaages")
+//        }
+    }
+    
+    private func addAnnotation(pin: Pin) {
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude)
+        
+        // Add the annotation on the main queue
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            self.mapView.addAnnotation(annotation)
+        })
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -54,6 +83,12 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         if let region = loadRegion() {
             print("Found stored region data")
             mapView.region = region
+        }
+        
+        if let pins = fetchedResultsController.fetchedObjects as? [Pin] {
+            for pin in pins {
+                addAnnotation(pin)
+            }
         }
     }
     
@@ -65,6 +100,10 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
             mapView.addAnnotation(annotation)
+            
+            saveLocation(coordinate.latitude, longitude: coordinate.longitude)
+            
+            // TODO: Determine where the zoom level should be saved
             saveRegion(mapView.region)
         } else
         {
@@ -72,10 +111,25 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         }
     }
     
+    private func saveLocation(latitude: Double, longitude: Double) {
+        // Create a new `Pin` instance
+        _ = Pin(latitude: latitude, longitude: longitude, context: sharedContext)
+        CoreDataManager.sharedInstance().saveContext()
+        
+    }
+    
     // MARK: MKMapViewDelegate
     
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        let v = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "MapViewAnnotation") as MKPinAnnotationView
+        v.pinColor = .Green
+        v.animatesDrop = true
+        return v
+    }
+
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         print("didSelectAnnotationView")
+        let coordinate = view.annotation?.coordinate
         performSegueWithIdentifier("ShowPhotoAlbumViewController", sender: self)
     }
     
@@ -112,4 +166,24 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         defaults.setDouble(region.span.longitudeDelta, forKey: "longitudeDelta")
     }
     
+    // MARK: - Core Data
+    
+    private var sharedContext: NSManagedObjectContext {
+        return CoreDataManager.sharedInstance().managedObjectContext!
+    }
+    
+    lazy var fetchedResultsController: NSFetchedResultsController = {
+        
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
+        
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
+            managedObjectContext: self.sharedContext,
+            sectionNameKeyPath: nil,
+            cacheName: nil)
+        
+        return fetchedResultsController
+    }()
+
 }
