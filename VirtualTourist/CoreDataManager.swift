@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 
 private let SQLITE_FILE_NAME = "VirtualTourist.sqlite"
-let kCoreDataErrorDomain = "CoreData"
+private let kCoreDataErrorDomain = "CoreData"
 
 class CoreDataManager {
     
@@ -32,7 +32,7 @@ class CoreDataManager {
         
         let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
         return urls[urls.count-1] 
-        }()
+    }()
     
     lazy var managedObjectModel: NSManagedObjectModel = {
         // The managed object model for the application. This property is not optional. It is a
@@ -40,9 +40,9 @@ class CoreDataManager {
 
         print("Instantiating the managedObjectModel property")
         
-        let modelURL = NSBundle.mainBundle().URLForResource("Model", withExtension: "momd")!
+        let modelURL = NSBundle.mainBundle().URLForResource("VirtualTourist", withExtension: "momd")!
         return NSManagedObjectModel(contentsOfURL: modelURL)!
-        }()
+    }()
     
     /**
      * The Persistent Store Coordinator is an object that the Context uses to interact with the underlying file system. Usually
@@ -89,7 +89,7 @@ class CoreDataManager {
         }
         
         return coordinator
-        }()
+    }()
     
     lazy var managedObjectContext: NSManagedObjectContext? = {
         
@@ -105,21 +105,22 @@ class CoreDataManager {
         var managedObjectContext = NSManagedObjectContext()
         managedObjectContext.persistentStoreCoordinator = coordinator
         return managedObjectContext
-        }()
+    }()
     
     // MARK: - Core Data Saving support
     
-    func saveContext () {
+    func saveContext() {
 
-        if let context = self.managedObjectContext {
+        guard let context = managedObjectContext else {
+            fatalError()
+        }
         
-            if context.hasChanges {
-                do {
-                    try context.save()
-                } catch let error as NSError {
-                    NSLog("Unresolved error \(error), \(error.userInfo)")
-                    abort()
-                }
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch let error as NSError {
+                NSLog("Unresolved error \(error), \(error.userInfo)")
+                abort()
             }
         }
     }
