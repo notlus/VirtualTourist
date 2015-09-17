@@ -27,8 +27,6 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         self.documentsDirectory.URLByAppendingPathComponent("VirtualTouristPhotos/")
         }()
 
-    private var lastRegion: MKCoordinateRegion?
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -66,7 +64,6 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
             let coordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
-//            let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "PinAnnotation")
             mapView.addAnnotation(annotation)
             saveRegion(mapView.region)
         } else

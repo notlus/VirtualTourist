@@ -31,10 +31,6 @@ public class FlickrClient {
     
     var dataHandler: FlickrDataHandler!
     
-//    init(dataHandler: FlickrDataHandler) {
-//        self.dataHandler = dataHandler
-//    }
-    
     /// Given a latitude and longitude, attempt to download images from Flickr. Call the provided
     /// completion handler when done.
     func downloadImagesForLocation(latitude: Double, longitude: Double, storagePath: NSURL, completion: (error: NSError?) -> ()) {
@@ -95,7 +91,6 @@ public class FlickrClient {
                     print("Request succeeded")
                     let httpResponse = response as! NSHTTPURLResponse
                     print("status: \(httpResponse.statusCode)\nall headers: \(httpResponse.allHeaderFields)")
-//                    var jsonError: NSError? = nil
                     let parsedResult = (try! NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments)) as! [String: AnyObject]
                     print(parsedResult)
                     
@@ -109,19 +104,6 @@ public class FlickrClient {
                         
                         let photoArray = photos["photo"] as! [[String: AnyObject]]
                         completion(photoPaths: photoArray, error: nil)
-                        // Now we have an array of photo information. We want to retrieve the
-                        // photo data from the URL (`url_m`) for each photo
-//                        let randomIndex = Int(arc4random_uniform(UInt32(photoArray.count)))
-//                        if let photoURL = photoArray[randomIndex]["url_m"] as? String {
-//                            println("Got URL \(photoURL) for photo at index \(randomIndex)")
-                        
-                            // Get the photo
-//                            if let photoData = NSData(contentsOfURL: NSURL(string: photoURL)!) {
-//                                self.dataHandler.handleData(photoData)
-//                                let image = UIImage(data: photoData)
-//                                let title = photoArray[randomIndex]["title"] as! String
-//                            }
-//                        }
                     }
                     else {
                         completion(photoPaths: [[String: AnyObject]](), error: NSError(domain: "FlickrClient", code: -1, userInfo: nil))
@@ -140,7 +122,6 @@ public class FlickrClient {
     private func createURLFromArguments(arguments: [String: String]) -> NSURL? {
         var methodString = String()
         for (key, value) in arguments {
-//            methodString += (methodString.isEmpty ? "?" : "&") + key + "=" + value.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
             methodString += (methodString.isEmpty ? "?" : "&") + key + "=" + value.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLUserAllowedCharacterSet())!
         }
         
