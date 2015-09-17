@@ -9,12 +9,29 @@
 import Foundation
 import CoreData
 
+@objc(Pin)
 class Pin: NSManagedObject {
-    @NSManaged var latitude: Float
-    @NSManaged var longitude: Float
+    @NSManaged var latitude: Double
+    @NSManaged var longitude: Double
     @NSManaged var photos: [Photo]
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
+    }
+    
+    init(latitude: Double, longitude: Double, context: NSManagedObjectContext) {
+        
+        // Get the entity associated with the "Pin" type.
+        guard let entity =  NSEntityDescription.entityForName("Pin", inManagedObjectContext: context) else {
+            print("Failed to get the `Pin` entity")
+            fatalError()
+        }
+
+        // Call the superclass to insert into the context
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+
+        // Initialize properties
+        self.latitude = latitude
+        self.longitude = longitude
     }
 }
