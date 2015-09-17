@@ -51,11 +51,11 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         
         print("fetched \(fetchedResultsController.fetchedObjects)")
         
-//        if let pins = fetchedResultsController.fetchedObjects as? [Pin] {
-//            for pin in pins {
-//                addAnnotation(pin)
-//            }
-//        }
+        if let pins = fetchedResultsController.fetchedObjects as? [Pin] {
+            for pin in pins {
+                addAnnotation(pin)
+            }
+        }
         
 //        fetchedResultsController.delegate = self
         
@@ -83,12 +83,6 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         if let region = loadRegion() {
             print("Found stored region data")
             mapView.region = region
-        }
-        
-        if let pins = fetchedResultsController.fetchedObjects as? [Pin] {
-            for pin in pins {
-                addAnnotation(pin)
-            }
         }
     }
     
