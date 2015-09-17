@@ -10,9 +10,9 @@ import Foundation
 import CoreData
 
 private let SQLITE_FILE_NAME = "VirtualTourist.sqlite"
+let kCoreDataErrorDomain = "CoreData"
 
 class CoreDataManager {
-    
     
     // MARK: - Shared Instance
     
@@ -35,7 +35,8 @@ class CoreDataManager {
         }()
     
     lazy var managedObjectModel: NSManagedObjectModel = {
-        // The managed object model for the application. This property is not optional. It is a fatal error for the application not to be able to find and load its model.
+        // The managed object model for the application. This property is not optional. It is a
+        // fatal error for the application not to be able to find and load its model.
 
         print("Instantiating the managedObjectModel property")
         
@@ -56,7 +57,10 @@ class CoreDataManager {
      */
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator? = {
-        // The persistent store coordinator for the application. This implementation creates and return a coordinator, having added the store for the application to it. This property is optional since there are legitimate error conditions that could cause the creation of the store to fail.
+        // The persistent store coordinator for the application. This implementation creates and 
+        // return a coordinator, having added the store for the application to it. This property is
+        // optional since there are legitimate error conditions that could cause the creation of the 
+        // store to fail.
         // Create the coordinator and store
         
         print("Instantiating the persistentStoreCoordinator property")
@@ -66,24 +70,21 @@ class CoreDataManager {
         
         print("sqlite path: \(url.path!)")
         
-        var error: NSError? = nil
-
         do {
             try coordinator!.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: nil)
-        } catch var error1 as NSError {
-            error = error1
+        } catch var error as NSError {
             coordinator = nil
-            // Report any error we got.
-            var dict = [String : AnyObject]() //NSMutableDictionary()
+            var dict = [String : AnyObject]()
             dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
             dict[NSLocalizedFailureReasonErrorKey] = "There was an error creating or loading the application's saved data."
             dict[NSUnderlyingErrorKey] = error
-            error = NSError(domain: "YOUR_ERROR_DOMAIN", code: 9999, userInfo: dict)
+            error = NSError(domain: kCoreDataErrorDomain, code: 100, userInfo: dict)
 
-            // Left in for development development.
-            NSLog("Unresolved error \(error), \(error!.userInfo)")
+            // Left in for development.
+            NSLog("Unresolved error \(error), \(error.userInfo)")
             abort()
         } catch {
+            // Unexpected error
             fatalError()
         }
         
@@ -94,7 +95,9 @@ class CoreDataManager {
         
         print("Instantiating the managedObjectContext property")
         
-        // Returns the managed object context for the application (which is already bound to the persistent store coordinator for the application.) This property is optional since there are legitimate error conditions that could cause the creation of the context to fail.
+        // Returns the managed object context for the application (which is already bound to the persistent 
+        // store coordinator for the application.) This property is optional since there are legitimate error
+        // conditions that could cause the creation of the context to fail.
         let coordinator = self.persistentStoreCoordinator
         if coordinator == nil {
             return nil
@@ -110,14 +113,11 @@ class CoreDataManager {
 
         if let context = self.managedObjectContext {
         
-            var error: NSError? = nil
-            
             if context.hasChanges {
                 do {
                     try context.save()
-                } catch let error1 as NSError {
-                    error = error1
-                    NSLog("Unresolved error \(error), \(error!.userInfo)")
+                } catch let error as NSError {
+                    NSLog("Unresolved error \(error), \(error.userInfo)")
                     abort()
                 }
             }
