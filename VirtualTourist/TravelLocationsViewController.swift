@@ -20,7 +20,7 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     // ** For testing **
     private var flickrClient = FlickrClient()
     private lazy var documentsDirectory: NSURL = {
-        NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first as! NSURL
+        return NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
         }()
     
     private lazy var photosPath: NSURL = {
@@ -35,8 +35,18 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         let lat = 0.0 //34.0500
         let lon = 0.0 //118.25
         
+        if (!NSFileManager.defaultManager().fileExistsAtPath(photosPath.path!)) {
+        
+            do {
+                try NSFileManager.defaultManager().createDirectoryAtURL(photosPath, withIntermediateDirectories: false, attributes: nil)
+            }
+            catch {
+                fatalError()
+            }
+        }
+        
         flickrClient.downloadImagesForLocation(lat, longitude: lon, storagePath: photosPath) { (error) -> () in
-            println("Got some imaages")
+            print("Got some imaages")
         }
     }
 
@@ -44,36 +54,36 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         super.viewWillAppear(animated)
         
         if let region = loadRegion() {
-            println("Found stored region data")
+            print("Found stored region data")
             mapView.region = region
         }
     }
     
     @IBAction func handleLongPress(sender: UILongPressGestureRecognizer) {
         if sender.state == UIGestureRecognizerState.Began {
-            println("Handling `Began` state for gesture")
+            print("Handling `Began` state for gesture")
             let touchPoint = sender.locationInView(mapView)
             let coordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
-            let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "PinAnnotation")
+//            let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "PinAnnotation")
             mapView.addAnnotation(annotation)
             saveRegion(mapView.region)
         } else
         {
-            println("Ignoring state")
+            print("Ignoring state")
         }
     }
     
     // MARK: MKMapViewDelegate
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
-        println("didSelectAnnotationView")
+        print("didSelectAnnotationView")
         performSegueWithIdentifier("ShowPhotoAlbumViewController", sender: self)
     }
     
     private func loadRegion() -> MKCoordinateRegion? {
-        println("Attempting to load region")
+        print("Attempting to load region")
         
         let defaults = NSUserDefaults.standardUserDefaults()
 
@@ -93,7 +103,7 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     }
     
     private func saveRegion(region: MKCoordinateRegion) {
-        println("Saving region")
+        print("Saving region")
         let defaults = NSUserDefaults.standardUserDefaults()
         
         let latitude = region.center.latitude

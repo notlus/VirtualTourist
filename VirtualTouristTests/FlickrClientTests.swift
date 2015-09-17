@@ -13,7 +13,7 @@ class FlickrClientTests: XCTestCase, FlickrDataHandler {
 
     private var flickrClient = FlickrClient()
     private lazy var documentsDirectory: NSURL = {
-       NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first as! NSURL
+        return NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
     }()
     
     private lazy var photosPath: NSURL = {
@@ -21,7 +21,7 @@ class FlickrClientTests: XCTestCase, FlickrDataHandler {
     }()
 
     func handleData(data: NSData) {
-        println("handleData")
+        print("handleData")
     }
     
     override func setUp() {
@@ -84,7 +84,7 @@ class FlickrClientTests: XCTestCase, FlickrDataHandler {
         let lon = 118.25
         
         flickrClient.downloadImagesForLocation(lat, longitude: lon, storagePath: photosPath) { (error) -> () in
-            println("Got some imaages")
+            print("Got some imaages")
         }
     }
 

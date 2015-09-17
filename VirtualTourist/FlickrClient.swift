@@ -39,13 +39,13 @@ public class FlickrClient {
     /// completion handler when done.
     func downloadImagesForLocation(latitude: Double, longitude: Double, storagePath: NSURL, completion: (error: NSError?) -> ()) {
         if latitude < MIN_LATITUDE || latitude > MAX_LATITUDE || longitude < MIN_LONGITUDE || longitude > MAX_LONGITUDE {
-            println("Invalid latitude/longitude")
+            print("Invalid latitude/longitude")
             let error = NSError(domain: "Invalid latitude/longitude", code: 100, userInfo: nil)
             completion(error: error)
         }
         
         let boundingBox = createBoundingBox("\(latitude)", "\(longitude)")
-        println("Bounding box=\(boundingBox)")
+        print("Bounding box=\(boundingBox)")
         
         let methodArguments = [
             "method": Flickr.API_METHOD,
@@ -58,21 +58,21 @@ public class FlickrClient {
 
         getImageFromFlickr(methodArguments) { (photosData, error) -> () in
             if let error = error {
-                println("Received an error downloading photos: \(error)")
+                print("Received an error downloading photos: \(error)")
             } else {
-                println("Got \(photosData.count) photos")
+                print("Got \(photosData.count) photos")
                 
                 // Save the photos at the paths to `storagePath`
-                let res = photosData.map({(photoData: [String: AnyObject]) -> NSURL in
+                _ = photosData.map({(photoData: [String: AnyObject]) -> NSURL in
                     if let photoURL = photoData["url_m"] as? String {
                         if let data = NSData(contentsOfURL: NSURL(string: photoURL)!) {
                             let title = photoData["title"] as! String
                             let filename = "\(title)-\(NSDate().timeIntervalSince1970)"
                             if let fullPath = NSURL(string: filename, relativeToURL: storagePath) {
                                 if (!data.writeToURL(fullPath, atomically: false)) {
-                                    println("Failed to write to URL: \(fullPath)")
+                                    print("Failed to write to URL: \(fullPath)")
                                 }
-                            return NSURL(fileURLWithPath: fullPath.path!)!
+                            return NSURL(fileURLWithPath: fullPath.path!)
                             }
                         }
                     }
@@ -86,27 +86,26 @@ public class FlickrClient {
         
         // Create a URL from the arguments
         if let flickrURL = createURLFromArguments(arguments) {
-//            let session = NSURLSession.sharedSession()
             let request = NSURLRequest(URL: flickrURL)
             let task = session.dataTaskWithRequest(request) { data, response, error in
                 if let err = error {
-                    println("Request failed with error=\(err)")
+                    print("Request failed with error=\(err)")
                 }
                 else {
-                    println("Request succeeded")
+                    print("Request succeeded")
                     let httpResponse = response as! NSHTTPURLResponse
-                    println("status: \(httpResponse.statusCode)\nall headers: \(httpResponse.allHeaderFields)")
-                    var jsonError: NSError? = nil
-                    let parsedResult = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments, error: &jsonError) as! [String: AnyObject]
-                    println(parsedResult)
+                    print("status: \(httpResponse.statusCode)\nall headers: \(httpResponse.allHeaderFields)")
+//                    var jsonError: NSError? = nil
+                    let parsedResult = (try! NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments)) as! [String: AnyObject]
+                    print(parsedResult)
                     
                     // Get the `photos` dictionary from the parsed response
                     let photos = parsedResult["photos"] as! [String: AnyObject]
                     
                     // See if we got any results
-                    let total = (photos["total"] as! String).toInt()!
+                    let total = Int((photos["total"] as! String))!
                     if total > 0 {
-                        println("Received \(total) photos!")
+                        print("Received \(total) photos!")
                         
                         let photoArray = photos["photo"] as! [[String: AnyObject]]
                         completion(photoPaths: photoArray, error: nil)
@@ -134,20 +133,21 @@ public class FlickrClient {
         }
         else
         {
-            println("Failed to create Flickr URL")
+            print("Failed to create Flickr URL")
         }
     }
     
     private func createURLFromArguments(arguments: [String: String]) -> NSURL? {
         var methodString = String()
         for (key, value) in arguments {
-            methodString += (methodString.isEmpty ? "?" : "&") + key + "=" + value.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+//            methodString += (methodString.isEmpty ? "?" : "&") + key + "=" + value.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+            methodString += (methodString.isEmpty ? "?" : "&") + key + "=" + value.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLUserAllowedCharacterSet())!
         }
         
-        var urlString = Flickr.BASE_URL + methodString
+        let urlString = Flickr.BASE_URL + methodString
         
         if let components = NSURLComponents(string: urlString) {
-            println("Got components")
+            print("Got components")
             return components.URL
         }
         
