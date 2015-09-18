@@ -9,7 +9,7 @@
 import UIKit
 import XCTest
 
-class FlickrClientTests: XCTestCase, FlickrDataHandler {
+class FlickrClientTests: XCTestCase {
 
     private var flickrClient = FlickrClient()
     private lazy var documentsDirectory: NSURL = {
@@ -26,7 +26,7 @@ class FlickrClientTests: XCTestCase, FlickrDataHandler {
     
     override func setUp() {
         super.setUp()
-        flickrClient.dataHandler = self
+//        flickrClient.dataHandler = self
     }
     
     override func tearDown() {
@@ -35,44 +35,44 @@ class FlickrClientTests: XCTestCase, FlickrDataHandler {
     }
 
     func testFlickrDownloadInvalidLatitude() {
-        flickrClient.downloadImagesForLocation(-1000, longitude: 0, storagePath: photosPath) { (error) -> () in
+        flickrClient.downloadImagesForLocation(-1000, longitude: 0, storagePath: photosPath) { (photos, error) -> () in
             let result = error != nil
             XCTAssert(result, "downloadImagesForLocation failed")
         }
 
-        flickrClient.downloadImagesForLocation(1000, longitude: 0, storagePath: photosPath) { (error) -> () in
+        flickrClient.downloadImagesForLocation(1000, longitude: 0, storagePath: photosPath) { (photos, error) -> () in
             let result = error != nil
             XCTAssert(result, "downloadImagesForLocation failed")
         }
 
-        flickrClient.downloadImagesForLocation(-91, longitude: 0, storagePath: photosPath) { (error) -> () in
+        flickrClient.downloadImagesForLocation(-91, longitude: 0, storagePath: photosPath) { (photos, error) -> () in
             let result = error != nil
             XCTAssert(result, "downloadImagesForLocation failed")
         }
 
-        flickrClient.downloadImagesForLocation(91, longitude: 0, storagePath: photosPath) { (error) -> () in
+        flickrClient.downloadImagesForLocation(91, longitude: 0, storagePath: photosPath) { (photos, error) -> () in
             let result = error != nil
             XCTAssert(result, "downloadImagesForLocation failed")
         }
 }
 
     func testFlickrDownloadInvalidLongitude() {
-        flickrClient.downloadImagesForLocation(0, longitude: -1000, storagePath: photosPath) { (error) -> () in
+        flickrClient.downloadImagesForLocation(0, longitude: -1000, storagePath: photosPath) { (photos, error) -> () in
             let result = error != nil
             XCTAssert(result, "downloadImagesForLocation failed")
         }
 
-        flickrClient.downloadImagesForLocation(0, longitude: 1000, storagePath: photosPath) { (error) -> () in
+        flickrClient.downloadImagesForLocation(0, longitude: 1000, storagePath: photosPath) { (photos, error) -> () in
             let result = error != nil
             XCTAssert(result, "downloadImagesForLocation failed")
         }
         
-        flickrClient.downloadImagesForLocation(0, longitude: -181, storagePath: photosPath) { (error) -> () in
+        flickrClient.downloadImagesForLocation(0, longitude: -181, storagePath: photosPath) { (photos, error) -> () in
             let result = error != nil
             XCTAssert(result, "downloadImagesForLocation failed")
         }
         
-        flickrClient.downloadImagesForLocation(0, longitude: 181, storagePath: photosPath) { (error) -> () in
+        flickrClient.downloadImagesForLocation(0, longitude: 181, storagePath: photosPath) { (photos, error) -> () in
             let result = error != nil
             XCTAssert(result, "downloadImagesForLocation failed")
         }
@@ -83,7 +83,7 @@ class FlickrClientTests: XCTestCase, FlickrDataHandler {
         let lat = 34.0500
         let lon = 118.25
         
-        flickrClient.downloadImagesForLocation(lat, longitude: lon, storagePath: photosPath) { (error) -> () in
+        flickrClient.downloadImagesForLocation(lat, longitude: lon, storagePath: photosPath) { (photos, error) -> () in
             print("Got some imaages")
         }
     }
