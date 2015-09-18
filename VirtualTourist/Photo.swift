@@ -12,12 +12,13 @@ import CoreData
 @objc(Photo)
 class Photo: NSManagedObject {
     @NSManaged var path: String
+    @NSManaged var pin: Pin
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
-    init(path: String, context: NSManagedObjectContext) {
+    init(path: String, pin: Pin, context: NSManagedObjectContext) {
         guard let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context) else {
             print("Failed to get the `Photo` entity")
             fatalError()
@@ -27,5 +28,6 @@ class Photo: NSManagedObject {
         
         // Initialize properties
         self.path = path
+        self.pin = pin
     }
 }
