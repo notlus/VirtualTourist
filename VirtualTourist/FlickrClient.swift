@@ -8,10 +8,6 @@
 
 import Foundation
 
-protocol FlickrDataHandler {
-    func handleData(data: NSData)
-}
-
 public class FlickrClient {
     
     struct Flickr {
@@ -20,6 +16,7 @@ public class FlickrClient {
         static let API_METHOD = "flickr.photos.search"
         static let FORMAT = "json"
         static let EXTRAS = "url_m"
+        static let MAX_PAGE = "20"
     }
 
     private let session = NSURLSession.sharedSession()
@@ -29,15 +26,15 @@ public class FlickrClient {
     private let MIN_LONGITUDE   = -180.0
     private let MAX_LONGITUDE   =  180.0
     
-    var dataHandler: FlickrDataHandler!
+    static let sharedInstance = FlickrClient()
     
     /// Given a latitude and longitude, attempt to download images from Flickr. Call the provided
     /// completion handler when done.
-    func downloadImagesForLocation(latitude: Double, longitude: Double, storagePath: NSURL, completion: (error: NSError?) -> ()) {
+    func downloadImagesForLocation(latitude: Double, longitude: Double, storagePath: NSURL, completion: (photos: [NSURL]?, error: NSError?) -> ()) {
         if latitude < MIN_LATITUDE || latitude > MAX_LATITUDE || longitude < MIN_LONGITUDE || longitude > MAX_LONGITUDE {
             print("Invalid latitude/longitude")
             let error = NSError(domain: "Invalid latitude/longitude", code: 100, userInfo: nil)
-            completion(error: error)
+            completion(photos: nil, error: error)
         }
         
         let boundingBox = createBoundingBox("\(latitude)", "\(longitude)")
@@ -48,6 +45,7 @@ public class FlickrClient {
             "api_key": Flickr.API_KEY,
             "format": Flickr.FORMAT,
             "extras": Flickr.EXTRAS,
+            "per_page": Flickr.MAX_PAGE,
             "bbox": boundingBox,
             "nojsoncallback": "1"
         ]
@@ -58,22 +56,27 @@ public class FlickrClient {
             } else {
                 print("Got \(photosData.count) photos")
                 
-                // Save the photos at the paths to `storagePath`
-                _ = photosData.map({(photoData: [String: AnyObject]) -> NSURL in
-                    if let photoURL = photoData["url_m"] as? String {
-                        if let data = NSData(contentsOfURL: NSURL(string: photoURL)!) {
-                            let title = photoData["title"] as! String
-                            let filename = "\(title)-\(NSDate().timeIntervalSince1970)"
-                            if let fullPath = NSURL(string: filename, relativeToURL: storagePath) {
-                                if (!data.writeToURL(fullPath, atomically: false)) {
-                                    print("Failed to write to URL: \(fullPath)")
-                                }
-                            return NSURL(fileURLWithPath: fullPath.path!)
+                // Save the photos at the paths to `storagePath` and return an array of the paths
+                let photos = photosData.map({(photoData: [String: AnyObject]) -> NSURL in
+                    if let photoURL = photoData["url_m"] as? String,
+                       let data = NSData(contentsOfURL: NSURL(string: photoURL)!) {
+                        
+                        let title = photoData["title"] as! String
+                        let filename = "\(NSDate().timeIntervalSince1970)-\(title)"
+                        if let fullPath = NSURL(string: filename, relativeToURL: storagePath) {
+                            if (!data.writeToURL(fullPath, atomically: false)) {
+                                print("Failed to write to URL: \(fullPath)")
                             }
+                            
+                            return NSURL(fileURLWithPath: fullPath.path!)
                         }
                     }
+                    
                     return NSURL()
                 })
+                
+                print("Photos: \(photos)")
+                completion(photos: photos, error: nil)
             }
         }
     }
@@ -90,7 +93,7 @@ public class FlickrClient {
                 else {
                     print("Request succeeded")
                     let httpResponse = response as! NSHTTPURLResponse
-                    print("status: \(httpResponse.statusCode)\nall headers: \(httpResponse.allHeaderFields)")
+                    print("status: \(httpResponse.statusCode)")
                     let parsedResult = (try! NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments)) as! [String: AnyObject]
                     print(parsedResult)
                     
