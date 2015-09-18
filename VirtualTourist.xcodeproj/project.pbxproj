@@ -99,11 +99,11 @@
 				370854481B9FA48B00A54575 /* Model */,
 				370854471B9FA47A00A54575 /* Controllers */,
 				370854221B9FA23200A54575 /* VirtualTouristAppDelegate.swift */,
+				37FA9F821BA734F0001E835A /* FlickrClient.swift */,
 				370854291B9FA23200A54575 /* Main.storyboard */,
 				3708542C1B9FA23200A54575 /* Images.xcassets */,
 				3708542E1B9FA23200A54575 /* LaunchScreen.xib */,
 				370854201B9FA23200A54575 /* Supporting Files */,
-				37FA9F821BA734F0001E835A /* FlickrClient.swift */,
 			);
 			path = VirtualTourist;
 			sourceTree = "<group>";
