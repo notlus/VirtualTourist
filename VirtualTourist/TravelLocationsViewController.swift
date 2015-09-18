@@ -19,24 +19,15 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         }
     }
     
-    // ** For testing **
-//    private var flickrClient = FlickrClient()
+    private let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
-    private lazy var documentsDirectory: NSURL = {
-        return NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
-    }()
-    
-    private lazy var photosPath: NSURL = {
-        self.documentsDirectory.URLByAppendingPathComponent("VirtualTouristPhotos/")
-    }()
-
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if (!NSFileManager.defaultManager().fileExistsAtPath(photosPath.path!)) {
+        if (!NSFileManager.defaultManager().fileExistsAtPath(appDelegate.photosPath.path!)) {
         
             do {
-                try NSFileManager.defaultManager().createDirectoryAtURL(photosPath, withIntermediateDirectories: false, attributes: nil)
+                try NSFileManager.defaultManager().createDirectoryAtURL(appDelegate.photosPath, withIntermediateDirectories: false, attributes: nil)
             }
             catch {
                 fatalError()
@@ -49,27 +40,20 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
             print("performFetch failed")
         }
         
-        print("fetched \(fetchedResultsController.fetchedObjects)")
+        print("fetched \(fetchedResultsController.fetchedObjects!.count) pins")
         
         if let pins = fetchedResultsController.fetchedObjects as? [Pin] {
             for pin in pins {
                 addAnnotation(pin)
             }
         }
-        
-//        fetchedResultsController.delegate = self
-        
-//        let lat = 0.0 //34.0500
-//        let lon = 0.0 //118.25
-       
-//        flickrClient.downloadImagesForLocation(lat, longitude: lon, storagePath: photosPath) { (error) -> () in
-//            print("Got some imaages")
-//        }
+
+        navigationItem.rightBarButtonItem = editButtonItem()
     }
     
     private func addAnnotation(pin: Pin) {
         let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude)
+        annotation.coordinate = CLLocationCoordinate2D(latitude: (pin.latitude as NSString).doubleValue, longitude: (pin.longitude as NSString).doubleValue)
         
         // Add the annotation on the main queue
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -107,9 +91,21 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     
     private func saveLocation(latitude: Double, longitude: Double) {
         // Create a new `Pin` instance
-        _ = Pin(latitude: latitude, longitude: longitude, context: sharedContext)
+        let newPin = Pin(latitude: latitude, longitude: longitude, context: sharedContext)
         CoreDataManager.sharedInstance().saveContext()
         
+//        sharedContext.performBlock { () -> Void in
+            print("Downloading from Flickr")
+            
+            FlickrClient.sharedInstance.downloadImagesForLocation(0, longitude: 0, storagePath: self.appDelegate.photosPath) { (photos, error) -> () in
+                print("Saving \(photos?.count) photos")
+                for photo in photos! {
+                    let _ = Photo(path: photo.relativePath!, pin: newPin, context: self.sharedContext)
+                }
+                
+                CoreDataManager.sharedInstance().saveContext()
+            }
+//        }
     }
     
     // MARK: MKMapViewDelegate
@@ -121,11 +117,24 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         return v
     }
 
+    private var tappedPin: CLLocationCoordinate2D?
+    
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         print("didSelectAnnotationView")
-        let coordinate = view.annotation?.coordinate
+        tappedPin = view.annotation?.coordinate
         performSegueWithIdentifier("ShowPhotoAlbumViewController", sender: self)
     }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        print("Preparing for segue")
+        
+        if segue.identifier == "ShowPhotoAlbumViewController" {
+            let photosVC = segue.destinationViewController as! PhotoAlbumViewController
+            photosVC.pin = Pin(latitude: tappedPin!.latitude, longitude: tappedPin!.longitude, context: sharedContext)
+        }
+    }
+    
+    // MARK: Load and save region data
     
     private func loadRegion() -> MKCoordinateRegion? {
         print("Attempting to load region")
@@ -179,5 +188,4 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         
         return fetchedResultsController
     }()
-
 }
