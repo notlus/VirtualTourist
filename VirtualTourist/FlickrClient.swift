@@ -56,7 +56,7 @@ public class FlickrClient {
             } else {
                 print("Got \(photosData.count) photos")
                 
-                // Save the photos at the paths to `storagePath` and return an array of the paths
+                // Save the photos at the paths to `storagePath` and return an array of file names
                 let photos = photosData.map({(photoData: [String: AnyObject]) -> NSURL in
                     if let photoURL = photoData["url_m"] as? String,
                        let data = NSData(contentsOfURL: NSURL(string: photoURL)!) {
@@ -68,7 +68,7 @@ public class FlickrClient {
                                 print("Failed to write to URL: \(fullPath)")
                             }
                             
-                            return NSURL(fileURLWithPath: fullPath.path!)
+                            return NSURL(fileURLWithPath: filename)
                         }
                     }
                     
