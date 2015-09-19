@@ -37,7 +37,7 @@ public class FlickrClient {
             completion(photos: nil, error: error)
         }
         
-        let boundingBox = createBoundingBox("\(latitude)", "\(longitude)")
+        let boundingBox = createBoundingBox(latitude, longitude)
         print("Bounding box=\(boundingBox)")
         
         let methodArguments = [
@@ -61,8 +61,14 @@ public class FlickrClient {
                     if let photoURL = photoData["url_m"] as? String,
                        let data = NSData(contentsOfURL: NSURL(string: photoURL)!) {
                         
-                        let title = photoData["title"] as! String
-                        let filename = "\(NSDate().timeIntervalSince1970)-\(title)"
+                        var filename: String
+                        var title = (photoData["title"] as! NSString).stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.alphanumericCharacterSet())!
+                        if title.characters.count > 255 {
+                            // Too long for a file name
+                            title = (title as NSString).substringWithRange(NSRange(location: 0, length: 237))
+                        }
+                        
+                        filename = "\(NSDate().timeIntervalSince1970)-\(title)"
                         if let fullPath = NSURL(string: filename, relativeToURL: storagePath) {
                             if (!data.writeToURL(fullPath, atomically: false)) {
                                 print("Failed to write to URL: \(fullPath)")
@@ -138,8 +144,8 @@ public class FlickrClient {
         return nil
     }
 
-    private func createBoundingBox(lat: String, _ lon: String) -> String {
-        return "\(lon),\(lat),\(lon),\(lat)"
+    private func createBoundingBox(lat: Double, _ lon: Double) -> String {
+        return "\(floor(lon)),\(floor(lat)),\(ceil(lon)),\(ceil(lat))"
     }
 
 }
