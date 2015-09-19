@@ -30,6 +30,9 @@ class PhotoAlbumViewController: UIViewController, NSFetchedResultsControllerDele
         }
         
         print("fetched \(fetchedResultsController.fetchedObjects!.count) photos")
+        if fetchedResultsController.fetchedObjects!.count == 0 {
+            collectionView.hidden = true
+        }
     }
 
     override func viewWillAppear(animated: Bool) {

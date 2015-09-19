@@ -18,7 +18,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="sLc-Zr-ZxF">
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="sLc-Zr-ZxF">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <gestureRecognizers/>
                                 <connections>
@@ -44,8 +44,8 @@
                             <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="sLc-Zr-ZxF" secondAttribute="bottom" id="2Fl-Ch-rdn"/>
                             <constraint firstItem="sLc-Zr-ZxF" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="topMargin" id="909-Fo-wcA"/>
                             <constraint firstItem="YL0-TG-dAI" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-20" id="YDK-jK-T7F"/>
-                            <constraint firstItem="sLc-Zr-ZxF" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-16" id="efQ-1j-t1w"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="sLc-Zr-ZxF" secondAttribute="trailing" constant="-16" id="fTc-a5-pbK"/>
+                            <constraint firstItem="sLc-Zr-ZxF" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-20" id="efQ-1j-t1w"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="sLc-Zr-ZxF" secondAttribute="trailing" constant="-20" id="fTc-a5-pbK"/>
                             <constraint firstAttribute="trailingMargin" secondItem="YL0-TG-dAI" secondAttribute="trailing" constant="-20" id="hM0-5m-gQ6"/>
                             <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="YL0-TG-dAI" secondAttribute="bottom" id="iyk-zJ-Akz"/>
                         </constraints>
@@ -113,6 +113,16 @@
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" zoomEnabled="NO" scrollEnabled="NO" rotateEnabled="NO" pitchEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zRA-6Q-6wS">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="176"/>
                             </mapView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="This pin has no images." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sCm-HL-CCY">
+                                <rect key="frame" x="0.0" y="110" width="600" height="380"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="600" id="Tcv-op-gwC"/>
+                                    <constraint firstAttribute="height" constant="380" id="aAa-CB-IDv"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nOf-ki-1pj">
                                 <rect key="frame" x="0.0" y="553" width="600" height="47"/>
                                 <constraints>
@@ -134,9 +144,11 @@
                             <constraint firstItem="P7k-fX-35e" firstAttribute="leading" secondItem="zRA-6Q-6wS" secondAttribute="leading" id="Fno-QZ-l35"/>
                             <constraint firstItem="P7k-fX-35e" firstAttribute="width" secondItem="nOf-ki-1pj" secondAttribute="width" id="MEU-oc-oZt"/>
                             <constraint firstAttribute="trailingMargin" secondItem="nOf-ki-1pj" secondAttribute="trailing" constant="-20" id="Mm0-Cl-ZSL"/>
+                            <constraint firstItem="sCm-HL-CCY" firstAttribute="centerY" secondItem="k3h-M5-JFv" secondAttribute="centerY" id="Zo2-xr-bis"/>
                             <constraint firstItem="zRA-6Q-6wS" firstAttribute="top" secondItem="pUc-WB-XEj" secondAttribute="bottom" constant="-64" id="clg-2C-TcY"/>
                             <constraint firstItem="zRA-6Q-6wS" firstAttribute="width" secondItem="P7k-fX-35e" secondAttribute="width" id="eW3-Xe-WE7"/>
                             <constraint firstItem="P7k-fX-35e" firstAttribute="top" secondItem="zRA-6Q-6wS" secondAttribute="bottom" constant="-2" id="wQ3-VV-9zZ"/>
+                            <constraint firstItem="sCm-HL-CCY" firstAttribute="centerX" secondItem="k3h-M5-JFv" secondAttribute="centerX" id="xYm-qB-1nR"/>
                         </constraints>
                     </view>
                     <connections>
