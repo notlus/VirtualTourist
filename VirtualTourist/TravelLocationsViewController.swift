@@ -12,6 +12,8 @@ import UIKit
 
 class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
     
+    @IBOutlet weak var deletePinsButton: UIButton!
+    
     @IBOutlet weak var mapView: MKMapView! {
         didSet {
             print("Setting delegate")
@@ -22,7 +24,38 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     private let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     @IBAction func handleEdit(sender: UIBarButtonItem) {
-        print("editing")
+        if !editing {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Done, target: self, action: "handleEdit:")
+            deletePinsButton.hidden = false
+        } else {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Edit, target: self, action: "handleEdit:")
+            deletePinsButton.hidden = true
+        }
+        
+        editing = !editing
+    }
+    
+    @IBAction func deleteAllPins() {
+        print("Deleting all pins")
+        
+        if let pins = fetchedResultsController.fetchedObjects as? [Pin] {
+            for pin in pins {
+                sharedContext.deleteObject(pin)
+            }
+            
+            for annotation in mapView.annotations {
+                mapView.removeAnnotation(annotation)
+            }
+            
+            do {
+                try sharedContext.save()
+            } catch {
+                print("Failed to delete objects")
+            }
+            
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Edit, target: self, action: "handleEdit:")
+            deletePinsButton.hidden = true
+        }
     }
     
     override func viewDidLoad() {
