@@ -12,9 +12,24 @@ import UIKit
 
 class PhotoAlbumViewController: UIViewController, NSFetchedResultsControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
+    // MARK: Outlets
+    
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var collectionButton: UIButton!
 
+    private let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    private var selectedItems = Set<Int>() {
+        didSet {
+            if selectedItems.count > 0 {
+                collectionButton.setTitle("Remove Selected Pictures", forState: .Normal)
+            }
+            else {
+                collectionButton.setTitle("New Collection", forState: .Normal)
+            }
+        }
+    }
+    
     var pin: Pin!
     
     override func viewDidLoad() {
@@ -50,7 +65,11 @@ class PhotoAlbumViewController: UIViewController, NSFetchedResultsControllerDele
     }
 
     @IBAction func newCollection() {
-        print("Creating collection")
+        if selectedItems.isEmpty {
+            print("Creating collection")
+        } else {
+            print("Removing \(selectedItems.count) photos")
+        }
     }
     
     // MARK: - Core Data
@@ -84,21 +103,30 @@ class PhotoAlbumViewController: UIViewController, NSFetchedResultsControllerDele
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         // Configure the cell
         let reuseIdentifier = "PhotoCell"
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) // as! UICollectionViewCell
-        cell.backgroundColor = UIColor.blueColor()
+        let photoCell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! CollectionViewPhotoCell
         
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         if let image = getImageForPhoto(photo) {
-            cell.contentView.addSubview(UIImageView(image: image))
+            photoCell.photoView.image = image
         }
         
-        return cell
+        return photoCell
     }
     
     // MARK: UICollectionViewDelegate
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        print("Selected cell")
+        let photoCell = collectionView.cellForItemAtIndexPath(indexPath) as! CollectionViewPhotoCell
+        
+        if selectedItems.contains(indexPath.row) {
+            // Unselect photo
+            photoCell.photoView.alpha = 1.0
+            selectedItems.remove(indexPath.row)
+        } else {
+            // Select photo
+            selectedItems.insert(indexPath.row)
+            photoCell.photoView.alpha = 0.25
+        }
     }
     
     // MARK: UICollectionViewDelegateFlowLayout
@@ -177,8 +205,6 @@ class PhotoAlbumViewController: UIViewController, NSFetchedResultsControllerDele
     }
     
     private func getImageForPhoto(photo: Photo) -> UIImage? {
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        
         var image: UIImage?
         if let fullPath = NSURL(string: photo.path, relativeToURL: appDelegate.photosPath) {
             image = UIImage(contentsOfFile: fullPath.path!)
