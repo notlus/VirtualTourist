@@ -34,7 +34,14 @@
                             <constraint firstAttribute="trailingMargin" secondItem="sLc-Zr-ZxF" secondAttribute="trailing" constant="-16" id="fTc-a5-pbK"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="mSQ-SR-tMo"/>
+                    <navigationItem key="navigationItem" id="mSQ-SR-tMo">
+                        <barButtonItem key="backBarButtonItem" title="OK" id="IT3-28-Slj"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="oMN-Nd-cdO">
+                            <connections>
+                                <action selector="handleEdit:" destination="vXZ-lx-hvc" id="aht-II-L6o"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="mapView" destination="sLc-Zr-ZxF" id="15h-sS-w7S"/>
                         <segue destination="9IH-4G-LdG" kind="show" identifier="ShowPhotoAlbumViewController" id="CY3-dj-ONy"/>
@@ -63,19 +70,19 @@
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="P7k-fX-35e">
                                 <rect key="frame" x="0.0" y="174" width="600" height="380"/>
-                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="73X-Is-h8m">
-                                    <size key="itemSize" width="98" height="92"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="73X-Is-h8m">
+                                    <size key="itemSize" width="120" height="120"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCell" id="pZg-fj-KHm">
-                                        <rect key="frame" x="0.0" y="64" width="98" height="92"/>
+                                        <rect key="frame" x="0.0" y="64" width="120" height="120"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="98" height="92"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="120" height="120"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
@@ -86,24 +93,24 @@
                                     <outlet property="delegate" destination="9IH-4G-LdG" id="gBQ-50-S0H"/>
                                 </connections>
                             </collectionView>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" zoomEnabled="NO" scrollEnabled="NO" rotateEnabled="NO" pitchEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zRA-6Q-6wS">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="176"/>
+                            </mapView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nOf-ki-1pj">
-                                <rect key="frame" x="0.0" y="562" width="600" height="38"/>
+                                <rect key="frame" x="0.0" y="553" width="600" height="47"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="38" id="oPk-Vq-qyY"/>
+                                    <constraint firstAttribute="height" constant="47" id="oPk-Vq-qyY"/>
                                 </constraints>
                                 <state key="normal" title="New Collection"/>
                                 <connections>
                                     <action selector="newCollection" destination="9IH-4G-LdG" eventType="touchUpInside" id="Y4O-uI-kaJ"/>
                                 </connections>
                             </button>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" zoomEnabled="NO" scrollEnabled="NO" rotateEnabled="NO" pitchEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zRA-6Q-6wS">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="176"/>
-                            </mapView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="tiA-FX-DU0" firstAttribute="top" secondItem="nOf-ki-1pj" secondAttribute="bottom" id="5ea-uT-Ybz"/>
-                            <constraint firstItem="nOf-ki-1pj" firstAttribute="top" secondItem="P7k-fX-35e" secondAttribute="bottom" constant="8" id="68m-Fa-lZb"/>
+                            <constraint firstItem="nOf-ki-1pj" firstAttribute="top" secondItem="P7k-fX-35e" secondAttribute="bottom" constant="-1" id="68m-Fa-lZb"/>
                             <constraint firstItem="nOf-ki-1pj" firstAttribute="leading" secondItem="k3h-M5-JFv" secondAttribute="leadingMargin" constant="-20" id="8Sx-OF-j8a"/>
                             <constraint firstItem="P7k-fX-35e" firstAttribute="leading" secondItem="nOf-ki-1pj" secondAttribute="leading" id="C8m-pp-Oja"/>
                             <constraint firstItem="P7k-fX-35e" firstAttribute="top" secondItem="pUc-WB-XEj" secondAttribute="bottom" constant="110" id="D2x-SG-1o8"/>
