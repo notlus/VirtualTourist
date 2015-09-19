@@ -25,29 +25,26 @@
                                     <outletCollection property="gestureRecognizers" destination="6Qg-ql-epX" appends="YES" id="nb1-sw-8b1"/>
                                 </connections>
                             </mapView>
-                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YL0-TG-dAI">
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap Pins to Delete" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Fin-PR-v77">
                                 <rect key="frame" x="0.0" y="545" width="600" height="55"/>
                                 <color key="backgroundColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="55" id="unA-Ll-T2o"/>
+                                    <constraint firstAttribute="height" constant="55" id="odW-ip-yyb"/>
                                 </constraints>
-                                <state key="normal" title="Tap Pins to Delete">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="deleteAllPins" destination="vXZ-lx-hvc" eventType="touchUpInside" id="ueG-hk-3Oe"/>
-                                </connections>
-                            </button>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="sLc-Zr-ZxF" secondAttribute="bottom" id="2Fl-Ch-rdn"/>
                             <constraint firstItem="sLc-Zr-ZxF" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="topMargin" id="909-Fo-wcA"/>
-                            <constraint firstItem="YL0-TG-dAI" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-20" id="YDK-jK-T7F"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Fin-PR-v77" secondAttribute="trailing" constant="-20" id="JPD-n0-xKO"/>
+                            <constraint firstItem="Fin-PR-v77" firstAttribute="bottom" secondItem="2fi-mo-0CV" secondAttribute="top" id="LCC-OP-lmI"/>
+                            <constraint firstItem="Fin-PR-v77" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-20" id="cUG-33-bb2"/>
                             <constraint firstItem="sLc-Zr-ZxF" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-20" id="efQ-1j-t1w"/>
                             <constraint firstAttribute="trailingMargin" secondItem="sLc-Zr-ZxF" secondAttribute="trailing" constant="-20" id="fTc-a5-pbK"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="YL0-TG-dAI" secondAttribute="trailing" constant="-20" id="hM0-5m-gQ6"/>
-                            <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="YL0-TG-dAI" secondAttribute="bottom" id="iyk-zJ-Akz"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="mSQ-SR-tMo">
@@ -59,7 +56,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="deletePinsButton" destination="YL0-TG-dAI" id="z5Z-NX-a8O"/>
+                        <outlet property="deletePinsLabel" destination="Fin-PR-v77" id="0Ne-5s-aN3"/>
                         <outlet property="mapView" destination="sLc-Zr-ZxF" id="15h-sS-w7S"/>
                         <segue destination="9IH-4G-LdG" kind="show" identifier="ShowPhotoAlbumViewController" id="CY3-dj-ONy"/>
                     </connections>
