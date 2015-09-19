@@ -11,7 +11,7 @@ import MapKit
 import UIKit
 
 class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
-
+    
     @IBOutlet weak var mapView: MKMapView! {
         didSet {
             print("Setting delegate")
@@ -21,8 +21,14 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     
     private let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
+    @IBAction func handleEdit(sender: UIBarButtonItem) {
+        print("editing")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        title = "Virtual Tourist"
         
         if (!NSFileManager.defaultManager().fileExistsAtPath(appDelegate.photosPath.path!)) {
         
@@ -47,8 +53,6 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
                 addAnnotation(pin)
             }
         }
-
-        navigationItem.rightBarButtonItem = editButtonItem()
     }
     
     private func addAnnotation(pin: Pin) {
