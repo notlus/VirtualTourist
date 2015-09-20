@@ -30,4 +30,12 @@ class Photo: NSManagedObject {
         self.path = path
         self.pin = pin
     }
+    
+    override func prepareForDeletion() {
+        do {
+            try NSFileManager.defaultManager().removeItemAtPath(path)
+        } catch {
+            print("Failed to delete \(path)")
+        }
+    }
 }
