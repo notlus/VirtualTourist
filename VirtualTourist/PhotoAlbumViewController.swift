@@ -22,10 +22,12 @@ class PhotoAlbumViewController: UIViewController,
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionButton: UIButton!
 
+    // MARK: Private Properties
+    
     private let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-    private var selectedItems = Set<Int>() {
+    private var selectedPhotos = Set<NSIndexPath>() {
         didSet {
-            if selectedItems.count > 0 {
+            if selectedPhotos.count > 0 {
                 collectionButton.setTitle("Remove Selected Pictures", forState: .Normal)
             }
             else {
@@ -34,6 +36,7 @@ class PhotoAlbumViewController: UIViewController,
         }
     }
     
+    // MARK: Public Properties
     var pin: Pin!
     
     override func viewDidLoad() {
@@ -68,11 +71,27 @@ class PhotoAlbumViewController: UIViewController,
         })
     }
 
+    // MARK: Actions
+    
     @IBAction func newCollection() {
-        if selectedItems.isEmpty {
+        if selectedPhotos.isEmpty {
             print("Creating collection")
         } else {
-            print("Removing \(selectedItems.count) photos")
+            print("Removing \(selectedPhotos.count) photos")
+            
+            for photoIndex in selectedPhotos {
+                sharedContext.deleteObject(fetchedResultsController.objectAtIndexPath(photoIndex) as! Photo)
+            }
+            
+            selectedPhotos.removeAll()
+            
+            do {
+                try sharedContext.save()
+            } catch {
+                print("Failed to save context")
+            }
+            
+            
         }
     }
     
@@ -82,7 +101,7 @@ class PhotoAlbumViewController: UIViewController,
         return CoreDataManager.sharedInstance().managedObjectContext!
     }
     
-    lazy var fetchedResultsController: NSFetchedResultsController = {
+    private lazy var fetchedResultsController: NSFetchedResultsController = {
         
         let fetchRequest = NSFetchRequest(entityName: "Photo")
         
@@ -121,13 +140,13 @@ class PhotoAlbumViewController: UIViewController,
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         let photoCell = collectionView.cellForItemAtIndexPath(indexPath) as! CollectionViewPhotoCell
         
-        if selectedItems.contains(indexPath.row) {
+        if selectedPhotos.contains(indexPath) {
             // Unselect photo
             photoCell.photoView.alpha = 1.0
-            selectedItems.remove(indexPath.row)
+            selectedPhotos.remove(indexPath)
         } else {
             // Select photo
-            selectedItems.insert(indexPath.row)
+            selectedPhotos.insert(indexPath)
             photoCell.photoView.alpha = 0.25
         }
     }
@@ -187,7 +206,7 @@ class PhotoAlbumViewController: UIViewController,
                 collectionView!.deleteItemsAtIndexPaths([indexPath!])
                 
             case .Update:
-                let cell = collectionView!.cellForItemAtIndexPath(indexPath!)! // as! ActorTableViewCell
+                let cell = collectionView!.cellForItemAtIndexPath(indexPath!)!
                 let photo = fetchedResultsController.objectAtIndexPath(indexPath!) as! Photo
                 if let image = getImageForPhoto(photo) {
                     cell.contentView.addSubview(UIImageView(image: image))
