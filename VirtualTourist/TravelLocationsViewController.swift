@@ -108,7 +108,7 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
 
     private func addAnnotation(pin: Pin) {
         let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: (pin.latitude as NSString).doubleValue, longitude: (pin.longitude as NSString).doubleValue)
+        annotation.coordinate = CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude)
         
         // Add the annotation on the main queue
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -124,24 +124,20 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
 //        sharedContext.performBlock { () -> Void in
             print("Downloading from Flickr")
             
-//            FlickrClient.sharedInstance.downloadImagesForLocation(0, longitude: 0, storagePath: self.appDelegate.photosPath) { (photos, error) -> () in
-//                print("Saving \(photos?.count) photos")
-//                for photo in photos! {
-//                    let _ = Photo(path: photo.relativePath!, pin: newPin, context: self.sharedContext)
-//                }
+            FlickrClient.sharedInstance.downloadImagesForLocation(latitude, longitude: longitude, storagePath: self.appDelegate.photosPath) { (photos, error) -> () in
+                print("Saving \(photos?.count) photos")
+                for photo in photos! {
+                    let _ = Photo(path: photo.relativePath!, pin: newPin, context: self.sharedContext)
+                }
         
-//                CoreDataManager.sharedInstance().saveContext()
-//            }
+                CoreDataManager.sharedInstance().saveContext()
+            }
     }
     
     private func findPin(annotation: MKAnnotation) -> Pin {
-        let nf = NSNumberFormatter()
-        nf.numberStyle = .DecimalStyle
-        
-        let latitude = nf.stringFromNumber(annotation.coordinate.latitude)!
-        let longitude = nf.stringFromNumber(annotation.coordinate.longitude)!
-
-        fetchedResultsController.fetchRequest.predicate = NSPredicate(format: "latitude == %@ AND longitude == %@", latitude, longitude)
+        let latitude = annotation.coordinate.latitude
+        let longitude = annotation.coordinate.longitude
+        fetchedResultsController.fetchRequest.predicate = NSPredicate(format: "latitude == %lf AND longitude == %lf", latitude, longitude)
 
         do {
             try fetchedResultsController.performFetch()
@@ -175,6 +171,7 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         
         if editing == false {
             saveRegion(mapView.region)
+            mapView.deselectAnnotation(view.annotation, animated: false)
             tappedPin = view.annotation?.coordinate
             performSegueWithIdentifier("ShowPhotoAlbumViewController", sender: self)
         } else {

@@ -11,8 +11,8 @@ import CoreData
 
 @objc(Pin)
 class Pin: NSManagedObject {
-    @NSManaged var latitude: String
-    @NSManaged var longitude: String
+    @NSManaged var latitude: Double
+    @NSManaged var longitude: Double
     @NSManaged var photos: [Photo]
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
@@ -31,11 +31,7 @@ class Pin: NSManagedObject {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
 
         // Initialize properties
-        // TODO: Store more than 2 digits of accuracy
-        let nf = NSNumberFormatter()
-        nf.numberStyle = .DecimalStyle
-
-        self.latitude = nf.stringFromNumber(latitude)!
-        self.longitude = nf.stringFromNumber(longitude)!
+        self.latitude = latitude
+        self.longitude = longitude
     }
 }

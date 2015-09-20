@@ -10,7 +10,11 @@ import CoreData
 import MapKit
 import UIKit
 
-class PhotoAlbumViewController: UIViewController, NSFetchedResultsControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class PhotoAlbumViewController: UIViewController,
+                                NSFetchedResultsControllerDelegate,
+                                UICollectionViewDelegate,
+                                UICollectionViewDataSource,
+                                UICollectionViewDelegateFlowLayout {
     
     // MARK: Outlets
     
@@ -52,7 +56,7 @@ class PhotoAlbumViewController: UIViewController, NSFetchedResultsControllerDele
 
     override func viewWillAppear(animated: Bool) {
         let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: (pin.latitude as NSString).doubleValue, longitude: (pin.longitude as NSString).doubleValue)
+        annotation.coordinate = CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude)
         
         // Add the annotation on the main queue
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -83,9 +87,8 @@ class PhotoAlbumViewController: UIViewController, NSFetchedResultsControllerDele
         let fetchRequest = NSFetchRequest(entityName: "Photo")
         
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "path", ascending: true)]
-        // TODO: fix
-//        fetchRequest.predicate = NSPredicate(format: "pin.latitude == %@ AND pin.longitude == %@", self.pin.latitude, self.pin.longitude)
-        
+        fetchRequest.predicate = NSPredicate(format: "pin.latitude == %lf AND pin.longitude == %lf", self.pin.latitude, self.pin.longitude)
+      
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
             managedObjectContext: self.sharedContext,
             sectionNameKeyPath: nil,
