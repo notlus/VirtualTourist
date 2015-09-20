@@ -208,10 +208,6 @@ class PhotoAlbumViewController: UIViewController,
     }
     
     private func getImageForPhoto(photo: Photo) -> UIImage? {
-        var image: UIImage?
-        if let fullPath = NSURL(string: photo.path, relativeToURL: appDelegate.photosPath) {
-            image = UIImage(contentsOfFile: fullPath.path!)
-        }
-        return image
+        return UIImage(contentsOfFile: photo.path)
     }
 }

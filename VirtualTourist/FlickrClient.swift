@@ -56,25 +56,21 @@ public class FlickrClient {
             } else {
                 print("Got \(photosData.count) photos")
                 
-                // Save the photos at the paths to `storagePath` and return an array of file names
+                // Save the photos at the paths to `storagePath` and return an array of file paths
                 let photos = photosData.map({(photoData: [String: AnyObject]) -> NSURL in
                     if let photoURL = photoData["url_m"] as? String,
                        let data = NSData(contentsOfURL: NSURL(string: photoURL)!) {
                         
-                        var filename: String
-                        var title = (photoData["title"] as! NSString).stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.alphanumericCharacterSet())!
-                        if title.characters.count > 255 {
-                            // Too long for a file name
-                            title = (title as NSString).substringWithRange(NSRange(location: 0, length: 237))
-                        }
-                        
-                        filename = "\(NSDate().timeIntervalSince1970)-\(title)"
+                        // Create the filename and write to storage
+                        let filename = "\(NSDate().timeIntervalSince1970)-\(arc4random())"
                         if let fullPath = NSURL(string: filename, relativeToURL: storagePath) {
                             if (!data.writeToURL(fullPath, atomically: false)) {
                                 print("Failed to write to URL: \(fullPath)")
                             }
                             
-                            return NSURL(fileURLWithPath: filename)
+                            return fullPath
+                        } else {
+                            print("Failed to create url for fullpath: \(filename) and \(storagePath)")
                         }
                     }
                     

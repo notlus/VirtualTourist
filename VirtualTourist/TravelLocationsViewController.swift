@@ -40,8 +40,10 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
                 do {
                     try sharedContext.save()
                 } catch {
-                    print("Error saving context")
+                    fatalError("Error saving context")
                 }
+            } else {
+                print("*** No changes found ***")
             }
             editing = false
         }
@@ -127,7 +129,7 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
             FlickrClient.sharedInstance.downloadImagesForLocation(latitude, longitude: longitude, storagePath: self.appDelegate.photosPath) { (photos, error) -> () in
                 print("Saving \(photos?.count) photos")
                 for photo in photos! {
-                    let _ = Photo(path: photo.relativePath!, pin: newPin, context: self.sharedContext)
+                    let _ = Photo(path: photo.path!, pin: newPin, context: self.sharedContext)
                 }
         
                 CoreDataManager.sharedInstance().saveContext()
@@ -179,9 +181,6 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
             let pin = findPin(view.annotation!)
             sharedContext.deleteObject(pin)
             mapView.removeAnnotation(view.annotation!)
-//            if let pins = fetchedResultsController.fetchedObjects as? [Pin] {
-//                mapView.removeAnnotation(view.annotation!)
-//            }
         }
     }
     
