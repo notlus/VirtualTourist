@@ -36,7 +36,11 @@ class PhotoAlbumViewController: UIViewController,
         }
     }
     
+    /// A dictionary that maps `NSFetchedResultsChangeType`s to an arry of `NSIndexPaths`s
+    private var objectChanges = [NSFetchedResultsChangeType: [NSIndexPath]]()
+    
     // MARK: Public Properties
+    
     var pin: Pin!
     
     override func viewDidLoad() {
@@ -90,8 +94,6 @@ class PhotoAlbumViewController: UIViewController,
             } catch {
                 print("Failed to save context")
             }
-            
-            
         }
     }
     
@@ -119,7 +121,7 @@ class PhotoAlbumViewController: UIViewController,
     // MARK: UICollectionViewDataSource
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return fetchedResultsController.fetchedObjects!.count
+        return (fetchedResultsController.sections?[section])?.numberOfObjects ?? 0
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
@@ -131,6 +133,8 @@ class PhotoAlbumViewController: UIViewController,
         if let image = getImageForPhoto(photo) {
             photoCell.photoView.image = image
         }
+        
+        photoCell.photoView.alpha = 1.0
         
         return photoCell
     }
@@ -180,6 +184,7 @@ class PhotoAlbumViewController: UIViewController,
         atIndex sectionIndex: Int,
         forChangeType type: NSFetchedResultsChangeType) {
             
+            // TODO: Handle
             switch type {
             case .Insert:
                 collectionView!.insertSections(NSIndexSet(index: sectionIndex))
@@ -200,30 +205,73 @@ class PhotoAlbumViewController: UIViewController,
             
             switch type {
             case .Insert:
-                collectionView!.insertItemsAtIndexPaths([newIndexPath!])
+                if let insertIndexPath = newIndexPath {
+                    var arr = objectChanges[type]
+                    if arr == nil {
+                        arr = [NSIndexPath]()
+                    }
+                    arr?.append(insertIndexPath)
+                    objectChanges[type] = arr
+                }
                 
             case .Delete:
-                collectionView!.deleteItemsAtIndexPaths([indexPath!])
+                if let deleteIndexPath = indexPath {
+                    var arr = objectChanges[type]
+                    if arr == nil {
+                        arr = [NSIndexPath]()
+                    }
+                    arr?.append(deleteIndexPath)
+                    objectChanges[type] = arr
+                }
                 
             case .Update:
-                let cell = collectionView!.cellForItemAtIndexPath(indexPath!)!
-                let photo = fetchedResultsController.objectAtIndexPath(indexPath!) as! Photo
-                if let image = getImageForPhoto(photo) {
-                    cell.contentView.addSubview(UIImageView(image: image))
+                if let updateIndexPath = indexPath {
+                    var arr = objectChanges[type]
+                    if arr == nil {
+                        arr = [NSIndexPath]()
+                    }
+                    arr?.append(updateIndexPath)
+                    objectChanges[type] = arr
                 }
 
-                // TODO: Handle
-                cell.backgroundColor = UIColor.orangeColor()
+//            case .Move:
+//                // TODO: Handle or remove
+//                if let old = indexPath, let new = newIndexPath {
+//                    objectChanges[type] = [old, new]
+//                }
                 
-            case .Move:
-                collectionView!.deleteItemsAtIndexPaths([indexPath!])
-                collectionView!.insertItemsAtIndexPaths([newIndexPath!])
+            default:
+                fatalError("Unsupported change type: \(type)")
             }
     }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         // TODO: Handle
-//        self.tableView.endUpdates()
+        print("controllerDidChangeContent")
+        collectionView.performBatchUpdates({ () -> Void in
+
+            for (changeType, indexPaths) in self.objectChanges {
+                switch changeType {
+                case .Delete:
+                    self.collectionView!.deleteItemsAtIndexPaths(indexPaths)
+                
+                case .Insert:
+                    self.collectionView!.insertItemsAtIndexPaths(indexPaths)
+                    
+                case .Update:
+                    self.collectionView!.reloadItemsAtIndexPaths(indexPaths)
+//                case .Move:
+                default:
+                    fatalError("Unexpected change type: \(changeType)")
+                }
+            }
+            
+            }) { (finished) -> Void in
+                print("Finished with batch updates")
+                
+                self.objectChanges.removeAll()
+                self.collectionView.reloadData()
+        }
     }
     
     private func getImageForPhoto(photo: Photo) -> UIImage? {
