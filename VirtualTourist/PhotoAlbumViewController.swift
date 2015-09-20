@@ -80,6 +80,41 @@ class PhotoAlbumViewController: UIViewController,
     @IBAction func newCollection() {
         if selectedPhotos.isEmpty {
             print("Creating collection")
+            
+            // Delete existing photos
+            if let photos = fetchedResultsController.fetchedObjects as? [Photo] {
+                for photoObject in photos {
+                    sharedContext.deleteObject(photoObject)
+                }
+                
+                do {
+                 try sharedContext.save()
+                } catch {
+                    print("Error saving context")
+                }
+            }
+            
+            // Load new photos
+            FlickrClient.sharedInstance.downloadImagesForLocation(pin.latitude, longitude: pin.longitude, storagePath: appDelegate.photosPath) { (photos, error) -> () in
+                    
+            if let photos = photos {
+                print("Saving \(photos.count) photos")
+                
+                for photo in photos {
+                    let _ = Photo(path: photo.path!, pin: self.pin, context: self.sharedContext)
+                }
+                
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    do {
+                        try self.sharedContext.save()
+                    } catch {
+                        print("Error saving context")
+                    }
+                })
+            }
+                
+            }
+
         } else {
             print("Removing \(selectedPhotos.count) photos")
             
