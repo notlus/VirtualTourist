@@ -97,11 +97,11 @@ class PhotoAlbumViewController: UIViewController,
                     sharedContext.deleteObject(photoObject)
                 }
                 
-//                do {
-//                    try sharedContext.save()
-//                } catch {
-//                    print("Error saving context")
-//                }
+                do {
+                    try sharedContext.save()
+                } catch {
+                    print("Error saving context")
+                }
             }
             
             // Load new photos
@@ -168,16 +168,19 @@ class PhotoAlbumViewController: UIViewController,
                 photoCell.photoView.hidden = true
                 photoCell.overlayView.hidden = false
                 print("Downloading photo")
-                if let image = downloadPhoto(photo) {
-                    photoCell.photoView.hidden = false
-                    photoCell.overlayView.hidden = true
-                    photoCell.activityView.stopAnimating()
-                    photoCell.photoView.image = image
-                } else {
-                    // There was an error downloading
-                    photoCell.activityView.stopAnimating()
-                    photoCell.overlayView.backgroundColor = UIColor.redColor()
-                }
+                downloadPhoto(photo, completion: { (image) -> () in
+                    if let image = image {
+                        photoCell.photoView.hidden = false
+                        photoCell.overlayView.hidden = true
+                        photoCell.activityView.stopAnimating()
+                        photoCell.photoView.image = image
+                    } else {
+                        // There was an error downloading
+                        photoCell.activityView.stopAnimating()
+                        photoCell.overlayView.backgroundColor = UIColor.redColor()
+                    }
+                    
+                })
             }
         } else {
             print("No photo found at index path \(indexPath)")
@@ -354,13 +357,15 @@ class PhotoAlbumViewController: UIViewController,
         }
     }
         
-    private func downloadPhoto(photo: Photo) -> UIImage? {
-        if let data = FlickrClient.sharedInstance.downloadImageForPhoto(photo) {
-            photo.downloaded = true
-//            try! sharedContext.save()
-            return UIImage(data: data)
-        }
-        
-        return nil
+    private func downloadPhoto(photo: Photo, completion: (image: UIImage?) -> ()) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
+            if let data = FlickrClient.sharedInstance.downloadImageForPhoto(photo) {
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    photo.downloaded = true
+                    try! self.sharedContext.save()
+                    completion(image: UIImage(data: data))
+                })
+            }
+        })
     }
 }
