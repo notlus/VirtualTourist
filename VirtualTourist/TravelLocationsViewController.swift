@@ -12,6 +12,8 @@ import UIKit
 
 class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
     
+    // MARK: Private properties
+    
     private let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
 
@@ -54,14 +56,15 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
             print("Handling `Began` state for gesture")
             let touchPoint = sender.locationInView(mapView)
             let coordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
-            let annotation = MKPointAnnotation()
+            let newPin = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, context: sharedContext)
+            let annotation = TravelLocationAnnotation()
+            annotation.locationPin = newPin
             annotation.coordinate = coordinate
             mapView.addAnnotation(annotation)
+            CoreDataManager.sharedInstance().saveContext()
+
+            getPhotosForLocation(newPin)
             
-            saveLocation(coordinate.latitude, longitude: coordinate.longitude)
-            
-            // TODO: Determine where the zoom level should be saved
-            saveRegion(mapView.region)
         } else {
             print("Ignoring state")
         }
@@ -109,7 +112,8 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     }
 
     private func addAnnotation(pin: Pin) {
-        let annotation = MKPointAnnotation()
+        let annotation = TravelLocationAnnotation()
+        annotation.locationPin = pin
         annotation.coordinate = CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude)
         
         // Add the annotation on the main queue
@@ -118,31 +122,27 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         })
     }
     
-    private func saveLocation(latitude: Double, longitude: Double) {
-        // Create a new `Pin` instance
-        let newPin = Pin(latitude: latitude, longitude: longitude, context: sharedContext)
-        CoreDataManager.sharedInstance().saveContext()
-        
-//        sharedContext.performBlock { () -> Void in
-            print("Downloading from Flickr")
+    private func getPhotosForLocation(pin: Pin) {
+        print("Downloading from Flickr")
             
-        FlickrClient.sharedInstance.downloadImagesForLocation(latitude, longitude: longitude, pageCount: newPin.pageCount, storagePath: self.appDelegate.photosPath) { (photos, pageCount, error) -> () in
+        FlickrClient.sharedInstance.downloadImagesForLocation(pin, pageCount: pin.pageCount, storagePath: self.appDelegate.photosPath) { (photos, pageCount, error) -> () in
             // Store the updated page count with the pin
-            newPin.pageCount = pageCount
-            
-            print("Saving \(photos?.count) photos")
-            for photo in photos! {
-                let _ = Photo(path: photo.path!, pin: newPin, context: self.sharedContext)
-            }
-    
-            CoreDataManager.sharedInstance().saveContext()
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                pin.pageCount = pageCount
+                
+                CoreDataManager.sharedInstance().saveContext()
+                print("Saved \(photos!.count) photos")
+            })
         }
     }
     
-    private func findPin(annotation: MKAnnotation) -> Pin {
-        let latitude = annotation.coordinate.latitude
-        let longitude = annotation.coordinate.longitude
-        fetchedResultsController.fetchRequest.predicate = NSPredicate(format: "latitude == %lf AND longitude == %lf", latitude, longitude)
+    private func findPin(annotation: TravelLocationAnnotation) -> Pin? {
+        guard let pin = annotation.locationPin else {
+            print("No pin in annotation")
+            return nil
+        }
+        
+        fetchedResultsController.fetchRequest.predicate = NSPredicate(format: "latitude == %lf AND longitude == %lf", pin.latitude, pin.longitude)
 
         do {
             try fetchedResultsController.performFetch()
@@ -169,22 +169,31 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         return v
     }
 
-    private var tappedPin: CLLocationCoordinate2D?
+    private var tappedPin: TravelLocationAnnotation?
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         print("didSelectAnnotationView")
         
+        guard let annotation = view.annotation else {
+            fatalError()
+        }
+        
         if editing == false {
             saveRegion(mapView.region)
-            mapView.deselectAnnotation(view.annotation, animated: false)
-            tappedPin = view.annotation?.coordinate
+            mapView.deselectAnnotation(annotation, animated: false)
+            tappedPin = annotation as? TravelLocationAnnotation
             performSegueWithIdentifier("ShowPhotoAlbumViewController", sender: self)
         } else {
             print("Deleting pin")
-            let pin = findPin(view.annotation!)
-            sharedContext.deleteObject(pin)
-            mapView.removeAnnotation(view.annotation!)
+            if let pin = findPin((annotation as? TravelLocationAnnotation)!) {
+                sharedContext.deleteObject(pin)
+                mapView.removeAnnotation(annotation)
+            }
         }
+    }
+    
+    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        saveRegion(mapView.region)
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -192,8 +201,9 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         
         if segue.identifier == "ShowPhotoAlbumViewController" {
             let photosVC = segue.destinationViewController as! PhotoAlbumViewController
-            photosVC.pin = Pin(latitude: tappedPin!.latitude, longitude: tappedPin!.longitude, context: sharedContext)
-            photosVC.updating = true
+            if let pin = tappedPin {
+                photosVC.pin = pin.locationPin
+            }
         }
     }
     
