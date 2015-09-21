@@ -201,8 +201,8 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         
         if segue.identifier == "ShowPhotoAlbumViewController" {
             let photosVC = segue.destinationViewController as! PhotoAlbumViewController
-            if let pin = tappedPin {
-                photosVC.pin = pin.locationPin
+            if let pin = tappedPin?.locationPin {
+                photosVC.pin = pin
             }
         }
     }
