@@ -85,19 +85,18 @@ public class FlickrClient {
                     newPhotos.append(newPhoto)
                     print("Downloading photo from \(newPhoto.remotePath) to \(newPhoto.localPath)")
                     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
-                        if let data = NSData(contentsOfURL: remoteURL) {
-                            if (!data.writeToURL(localURL, atomically: false)) {
-                                print("Failed to write to URL: \(localURL)")
-                            } else {
-                                dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                    newPhoto.downloaded = true
-                                    do {
-                                        try CoreDataManager.sharedInstance().managedObjectContext!.save()
-                                    } catch {
-                                        print("Error saving context")
-                                    }
-                                })
-                            }
+                        if let _ = self.downloadImageForPhoto(newPhoto) {
+                            print("Downloaded photo from \(newPhoto.remotePath)")
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                newPhoto.downloaded = true
+                                do {
+                                    try CoreDataManager.sharedInstance().managedObjectContext!.save()
+                                } catch {
+                                    print("Error saving context")
+                                }
+                            })
+                        } else {
+                            print("Failed to download photo from \(newPhoto.remotePath)")
                         }
                     })
                 }
@@ -111,6 +110,23 @@ public class FlickrClient {
                 completion(photos: newPhotos, pageCount: pageCount, error: nil)
             }
         }
+    }
+    
+    func downloadImageForPhoto(photo: Photo) -> NSData? {
+        guard let remoteURL = NSURL(string: photo.remotePath) else {
+                print("Invalid remote path")
+                fatalError()
+        }
+        
+        if let data = NSData(contentsOfURL: remoteURL) {
+            if (!data.writeToFile(photo.localPath, atomically: true)) {
+                print("Failed to write to URL: \(photo.localPath)")
+                return nil
+            }
+            return data
+        }
+
+        return nil
     }
     
     private func getImageFromFlickr(arguments: [String: String], completion: (photoPaths: [[String: AnyObject]], pageCount: Int, error: NSError?) -> ()) {
