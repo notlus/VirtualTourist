@@ -21,6 +21,11 @@ class PhotoAlbumViewController: UIViewController,
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionButton: UIButton!
+    @IBOutlet weak var noImagesLabel: UILabel! {
+        didSet {
+            noImagesLabel.hidden = true
+        }
+    }
 
     // MARK: Private Properties
     
@@ -35,6 +40,8 @@ class PhotoAlbumViewController: UIViewController,
             }
         }
     }
+    
+    var updating = false
     
     /// A dictionary that maps `NSFetchedResultsChangeType`s to an arry of `NSIndexPaths`s
     private var objectChanges = [NSFetchedResultsChangeType: [NSIndexPath]]()
@@ -57,7 +64,11 @@ class PhotoAlbumViewController: UIViewController,
         
         print("fetched \(fetchedResultsController.fetchedObjects!.count) photos")
         if fetchedResultsController.fetchedObjects!.count == 0 {
-            collectionView.hidden = true
+//            collectionView.hidden = true
+//            noImagesLabel.hidden = false
+            updating = true
+        } else {
+            updating = false
         }
     }
 
@@ -81,6 +92,9 @@ class PhotoAlbumViewController: UIViewController,
         if selectedPhotos.isEmpty {
             print("Creating collection")
             
+            collectionButton.enabled = false
+            updating = true
+            
             // Delete existing photos
             if let photos = fetchedResultsController.fetchedObjects as? [Photo] {
                 for photoObject in photos {
@@ -88,31 +102,38 @@ class PhotoAlbumViewController: UIViewController,
                 }
                 
                 do {
-                 try sharedContext.save()
+                    try sharedContext.save()
                 } catch {
                     print("Error saving context")
                 }
             }
             
             // Load new photos
-            FlickrClient.sharedInstance.downloadImagesForLocation(pin.latitude, longitude: pin.longitude, storagePath: appDelegate.photosPath) { (photos, error) -> () in
+            FlickrClient.sharedInstance.downloadImagesForLocation(pin.latitude, longitude: pin.longitude,
+                pageCount: pin.pageCount, storagePath: appDelegate.photosPath) { (photos, pages, error) -> () in
+                
+                // Update the pin with the number of pages associated with the location
+                self.pin.pageCount = pages
                     
-            if let photos = photos {
-                print("Saving \(photos.count) photos")
-                
-                for photo in photos {
-                    let _ = Photo(path: photo.path!, pin: self.pin, context: self.sharedContext)
+                if let photos = photos {
+                    print("Saving \(photos.count) photos")
+                    
+                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                        for photo in photos {
+                            let _ = Photo(path: photo.path!, pin: self.pin, context: self.sharedContext)
+                        }
+                    
+                        do {
+                            try self.sharedContext.save()
+                        } catch {
+                            print("Error saving context")
+                        }
+                        
+                        self.collectionButton.enabled = true
+                        self.updating = false
+                        self.collectionView.reloadData()
+                    })
                 }
-                
-                dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                    do {
-                        try self.sharedContext.save()
-                    } catch {
-                        print("Error saving context")
-                    }
-                })
-            }
-                
             }
 
         } else {
@@ -156,6 +177,10 @@ class PhotoAlbumViewController: UIViewController,
     // MARK: UICollectionViewDataSource
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if updating {
+            return 51
+        }
+        
         return (fetchedResultsController.sections?[section])?.numberOfObjects ?? 0
     }
     
@@ -164,9 +189,16 @@ class PhotoAlbumViewController: UIViewController,
         let reuseIdentifier = "PhotoCell"
         let photoCell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! CollectionViewPhotoCell
         
-        let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-        if let image = getImageForPhoto(photo) {
-            photoCell.photoView.image = image
+        if updating {
+//            photoCell.activityView.hidden = false
+            photoCell.activityView.startAnimating()
+            photoCell.photoView.hidden = true
+        }
+        else {
+            let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+            if let image = getImageForPhoto(photo) {
+                photoCell.photoView.image = image
+            }
         }
         
         photoCell.photoView.alpha = 1.0
@@ -212,6 +244,7 @@ class PhotoAlbumViewController: UIViewController,
 
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
         print("controllerWillChangeContent")
+        updating = false
     }
     
     func controller(controller: NSFetchedResultsController,

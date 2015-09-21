@@ -15,6 +15,9 @@ class Pin: NSManagedObject {
     @NSManaged var longitude: Double
     @NSManaged var photos: [Photo]
     
+    /// The total number of pages associated this pin. Zero means no photos downloaded
+    @NSManaged var pageCount: Int
+    
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
@@ -33,5 +36,6 @@ class Pin: NSManagedObject {
         // Initialize properties
         self.latitude = latitude
         self.longitude = longitude
+        self.pageCount = 0
     }
 }

@@ -126,14 +126,17 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
 //        sharedContext.performBlock { () -> Void in
             print("Downloading from Flickr")
             
-            FlickrClient.sharedInstance.downloadImagesForLocation(latitude, longitude: longitude, storagePath: self.appDelegate.photosPath) { (photos, error) -> () in
-                print("Saving \(photos?.count) photos")
-                for photo in photos! {
-                    let _ = Photo(path: photo.path!, pin: newPin, context: self.sharedContext)
-                }
-        
-                CoreDataManager.sharedInstance().saveContext()
+        FlickrClient.sharedInstance.downloadImagesForLocation(latitude, longitude: longitude, pageCount: newPin.pageCount, storagePath: self.appDelegate.photosPath) { (photos, pageCount, error) -> () in
+            // Store the updated page count with the pin
+            newPin.pageCount = pageCount
+            
+            print("Saving \(photos?.count) photos")
+            for photo in photos! {
+                let _ = Photo(path: photo.path!, pin: newPin, context: self.sharedContext)
             }
+    
+            CoreDataManager.sharedInstance().saveContext()
+        }
     }
     
     private func findPin(annotation: MKAnnotation) -> Pin {
@@ -190,6 +193,7 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         if segue.identifier == "ShowPhotoAlbumViewController" {
             let photosVC = segue.destinationViewController as! PhotoAlbumViewController
             photosVC.pin = Pin(latitude: tappedPin!.latitude, longitude: tappedPin!.longitude, context: sharedContext)
+            photosVC.updating = true
         }
     }
     

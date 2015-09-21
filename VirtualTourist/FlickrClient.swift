@@ -10,13 +10,13 @@ import Foundation
 
 public class FlickrClient {
     
-    struct Flickr {
+    struct APIConstants {
         static let API_KEY = "7a7950524c71e50ecca5e2bd7535fe69"
         static let BASE_URL = "https://api.flickr.com/services/rest/"
         static let API_METHOD = "flickr.photos.search"
         static let FORMAT = "json"
         static let EXTRAS = "url_m"
-        static let MAX_PAGE = "20"
+        static let MAX_PAGE = "50"
     }
 
     private let session = NSURLSession.sharedSession()
@@ -30,27 +30,32 @@ public class FlickrClient {
     
     /// Given a latitude and longitude, attempt to download images from Flickr. Call the provided
     /// completion handler when done.
-    func downloadImagesForLocation(latitude: Double, longitude: Double, storagePath: NSURL, completion: (photos: [NSURL]?, error: NSError?) -> ()) {
+    func downloadImagesForLocation(latitude: Double, longitude: Double, pageCount: Int, storagePath: NSURL, completion: (photos: [NSURL]?, pageCount: Int, error: NSError?) -> ()) {
+//    func downloadImagesForLocation(latitude: Double, longitude: Double, storagePath: NSURL, completion: (photos: [NSURL]?, error: NSError?) -> ()) {
         if latitude < MIN_LATITUDE || latitude > MAX_LATITUDE || longitude < MIN_LONGITUDE || longitude > MAX_LONGITUDE {
             print("Invalid latitude/longitude")
             let error = NSError(domain: "Invalid latitude/longitude", code: 100, userInfo: nil)
-            completion(photos: nil, error: error)
+            completion(photos: nil, pageCount: pageCount, error: error)
         }
         
         let boundingBox = createBoundingBox(latitude, longitude)
         print("Bounding box=\(boundingBox)")
         
+        let randomPage = "\(arc4random_uniform(UInt32(pageCount) + 1))"
         let methodArguments = [
-            "method": Flickr.API_METHOD,
-            "api_key": Flickr.API_KEY,
-            "format": Flickr.FORMAT,
-            "extras": Flickr.EXTRAS,
-            "per_page": Flickr.MAX_PAGE,
+            "method": APIConstants.API_METHOD,
+            "api_key": APIConstants.API_KEY,
+            "format": APIConstants.FORMAT,
+            "extras": APIConstants.EXTRAS,
+            "per_page": APIConstants.MAX_PAGE,
             "bbox": boundingBox,
-            "nojsoncallback": "1"
+            "nojsoncallback": "1",
+            "page": randomPage
         ]
-
-        getImageFromFlickr(methodArguments) { (photosData, error) -> () in
+        
+        print("*** Using page count \(pageCount) and got random page \(randomPage)")
+        
+        getImageFromFlickr(methodArguments) { (photosData, pageCount, error) -> () in
             if let error = error {
                 print("Received an error downloading photos: \(error)")
             } else {
@@ -64,9 +69,12 @@ public class FlickrClient {
                         // Create the filename and write to storage
                         let filename = "\(NSDate().timeIntervalSince1970)-\(arc4random())"
                         if let fullPath = NSURL(string: filename, relativeToURL: storagePath) {
-                            if (!data.writeToURL(fullPath, atomically: false)) {
-                                print("Failed to write to URL: \(fullPath)")
-                            }
+                            // Download the photo on the global queue
+                            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
+                                if (!data.writeToURL(fullPath, atomically: false)) {
+                                    print("Failed to write to URL: \(fullPath)")
+                                }
+                            })
                             
                             return fullPath
                         } else {
@@ -77,13 +85,12 @@ public class FlickrClient {
                     return NSURL()
                 })
                 
-                print("Photos: \(photos)")
-                completion(photos: photos, error: nil)
+                completion(photos: photos, pageCount: pageCount, error: nil)
             }
         }
     }
     
-    private func getImageFromFlickr(arguments: [String: String], completion: (photoPaths: [[String: AnyObject]], error: NSError?) -> ()) {
+    private func getImageFromFlickr(arguments: [String: String], completion: (photoPaths: [[String: AnyObject]], pageCount: Int, error: NSError?) -> ()) {
         
         // Create a URL from the arguments
         if let flickrURL = createURLFromArguments(arguments) {
@@ -105,13 +112,16 @@ public class FlickrClient {
                     // See if we got any results
                     let total = Int((photos["total"] as! String))!
                     if total > 0 {
-                        print("Received \(total) photos!")
+                        // Store the number last page download and the total number of pages
+                        let lastPage = photos["page"] as! Int
+                        let lastPageCount = photos["pages"] as! Int
+                        print("Received page \(lastPage) of \(lastPageCount) pages, with \(total) photos!")
                         
                         let photoArray = photos["photo"] as! [[String: AnyObject]]
-                        completion(photoPaths: photoArray, error: nil)
+                        completion(photoPaths: photoArray, pageCount: lastPageCount, error: nil)
                     }
                     else {
-                        completion(photoPaths: [[String: AnyObject]](), error: NSError(domain: "FlickrClient", code: -1, userInfo: nil))
+                        completion(photoPaths: [[String: AnyObject]](), pageCount: 0, error: NSError(domain: "FlickrClient", code: -1, userInfo: nil))
                     }
                 }
             }
@@ -130,7 +140,7 @@ public class FlickrClient {
             methodString += (methodString.isEmpty ? "?" : "&") + key + "=" + value.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLUserAllowedCharacterSet())!
         }
         
-        let urlString = Flickr.BASE_URL + methodString
+        let urlString = APIConstants.BASE_URL + methodString
         
         if let components = NSURLComponents(string: urlString) {
             print("Got components")

@@ -10,7 +10,12 @@ import UIKit
 
 class CollectionViewPhotoCell: UICollectionViewCell {
     
-    @IBOutlet weak var overlayView: UIView!
-    @IBOutlet weak var photoView: UIImageView!
+    @IBOutlet weak var overlayView: UIView! {
+        didSet {
+            overlayView.hidden = true
+        }
+    }
     
+    @IBOutlet weak var photoView: UIImageView!
+    @IBOutlet weak var activityView: UIActivityIndicatorView!
 }
