@@ -106,7 +106,7 @@
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aZO-6e-Zpc">
                                                     <rect key="frame" x="5" y="5" width="110" height="110"/>
                                                     <subviews>
-                                                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="Hpr-vG-Z4z">
+                                                        <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="Hpr-vG-Z4z">
                                                             <rect key="frame" x="37" y="37" width="37" height="37"/>
                                                             <animations/>
                                                         </activityIndicatorView>
