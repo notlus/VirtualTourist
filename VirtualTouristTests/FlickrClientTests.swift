@@ -33,7 +33,7 @@ class FlickrClientTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-
+/*
     func testFlickrDownloadInvalidLatitude() {
         flickrClient.downloadImagesForLocation(-1000, longitude: 0, storagePath: photosPath) { (photos, error) -> () in
             let result = error != nil
@@ -87,5 +87,5 @@ class FlickrClientTests: XCTestCase {
             print("Got some imaages")
         }
     }
-
+*/
 }
