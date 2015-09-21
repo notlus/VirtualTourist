@@ -41,7 +41,15 @@ class PhotoAlbumViewController: UIViewController,
         }
     }
     
-    var updating = false
+    var updating = false {
+        willSet {
+            print("will set updating from \(updating) to \(newValue)")
+        }
+        
+        didSet {
+            print("did set updating to \(updating)")
+        }
+    }
     
     /// A dictionary that maps `NSFetchedResultsChangeType`s to an arry of `NSIndexPaths`s
     private var objectChanges = [NSFetchedResultsChangeType: [NSIndexPath]]()
@@ -64,11 +72,26 @@ class PhotoAlbumViewController: UIViewController,
         
         print("fetched \(fetchedResultsController.fetchedObjects!.count) photos")
         if fetchedResultsController.fetchedObjects!.count == 0 {
-//            collectionView.hidden = true
-//            noImagesLabel.hidden = false
+            // No photos downloaded yet, so try to get some
+            
             updating = true
-        } else {
-            updating = false
+            
+            FlickrClient.sharedInstance.downloadImagesForLocation(pin, pageCount: pin.pageCount, storagePath: appDelegate.photosPath) { (photos, pages, error) -> () in
+                    
+                    if let photos = photos {
+                        
+                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                            // Update the pin with the number of pages associated with the location
+                            self.pin.pageCount = pages
+                            
+                            print("Saved \(photos.count) photos")
+                            
+                            self.collectionButton.enabled = true
+                            self.updating = false
+                            self.collectionView.reloadData()
+                        })
+                    }
+            }
         }
     }
 
@@ -90,10 +113,9 @@ class PhotoAlbumViewController: UIViewController,
     
     @IBAction func newCollection() {
         if selectedPhotos.isEmpty {
-            print("Creating collection")
+            print("Retrieving new collection")
             
             collectionButton.enabled = false
-            updating = true
             
             // Delete existing photos
             if let photos = fetchedResultsController.fetchedObjects as? [Photo] {
@@ -108,27 +130,19 @@ class PhotoAlbumViewController: UIViewController,
                 }
             }
             
+            updating = true
+            
             // Load new photos
-            FlickrClient.sharedInstance.downloadImagesForLocation(pin.latitude, longitude: pin.longitude,
-                pageCount: pin.pageCount, storagePath: appDelegate.photosPath) { (photos, pages, error) -> () in
+            FlickrClient.sharedInstance.downloadImagesForLocation(pin, pageCount: pin.pageCount, storagePath: appDelegate.photosPath) { (photos, pages, error) -> () in
                 
-                // Update the pin with the number of pages associated with the location
-                self.pin.pageCount = pages
-                    
                 if let photos = photos {
-                    print("Saving \(photos.count) photos")
                     
                     dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        for photo in photos {
-                            let _ = Photo(path: photo.path!, pin: self.pin, context: self.sharedContext)
-                        }
-                    
-                        do {
-                            try self.sharedContext.save()
-                        } catch {
-                            print("Error saving context")
-                        }
-                        
+                        // Update the pin with the number of pages associated with the location
+                        self.pin.pageCount = pages
+
+                        print("Saved \(photos.count) photos")
+
                         self.collectionButton.enabled = true
                         self.updating = false
                         self.collectionView.reloadData()
@@ -163,7 +177,7 @@ class PhotoAlbumViewController: UIViewController,
         
         let fetchRequest = NSFetchRequest(entityName: "Photo")
         
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "path", ascending: true)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "localPath", ascending: true)]
         fetchRequest.predicate = NSPredicate(format: "pin.latitude == %lf AND pin.longitude == %lf", self.pin.latitude, self.pin.longitude)
       
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
@@ -177,10 +191,6 @@ class PhotoAlbumViewController: UIViewController,
     // MARK: UICollectionViewDataSource
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if updating {
-            return 51
-        }
-        
         return (fetchedResultsController.sections?[section])?.numberOfObjects ?? 0
     }
     
@@ -189,16 +199,19 @@ class PhotoAlbumViewController: UIViewController,
         let reuseIdentifier = "PhotoCell"
         let photoCell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! CollectionViewPhotoCell
         
-        if updating {
-//            photoCell.activityView.hidden = false
-            photoCell.activityView.startAnimating()
-            photoCell.photoView.hidden = true
-        }
-        else {
-            let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+        let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+        if photo.downloaded {
+            photoCell.photoView.hidden = false
+            photoCell.overlayView.hidden = true
+            photoCell.activityView.stopAnimating()
             if let image = getImageForPhoto(photo) {
                 photoCell.photoView.image = image
             }
+        } else {
+            print("Photo not downloaded!")
+            photoCell.activityView.startAnimating()
+            photoCell.photoView.hidden = true
+            photoCell.overlayView.hidden = false
         }
         
         photoCell.photoView.alpha = 1.0
@@ -244,7 +257,6 @@ class PhotoAlbumViewController: UIViewController,
 
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
         print("controllerWillChangeContent")
-        updating = false
     }
     
     func controller(controller: NSFetchedResultsController,
@@ -301,12 +313,6 @@ class PhotoAlbumViewController: UIViewController,
                     arr?.append(updateIndexPath)
                     objectChanges[type] = arr
                 }
-
-//            case .Move:
-//                // TODO: Handle or remove
-//                if let old = indexPath, let new = newIndexPath {
-//                    objectChanges[type] = [old, new]
-//                }
                 
             default:
                 fatalError("Unsupported change type: \(type)")
@@ -316,19 +322,29 @@ class PhotoAlbumViewController: UIViewController,
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         // TODO: Handle
         print("controllerDidChangeContent")
+        
+        if updating {
+            print("updating, so returning")
+            return
+        }
+
+        print("*** Performing batch update ***")
         collectionView.performBatchUpdates({ () -> Void in
 
             for (changeType, indexPaths) in self.objectChanges {
                 switch changeType {
                 case .Delete:
-                    self.collectionView!.deleteItemsAtIndexPaths(indexPaths)
+                    print("Deleting \(indexPaths.count) index paths")
+                    self.collectionView.deleteItemsAtIndexPaths(indexPaths)
                 
                 case .Insert:
-                    self.collectionView!.insertItemsAtIndexPaths(indexPaths)
+                    print("Inserting \(indexPaths.count) index paths")
+                    self.collectionView.insertItemsAtIndexPaths(indexPaths)
                     
                 case .Update:
-                    self.collectionView!.reloadItemsAtIndexPaths(indexPaths)
-//                case .Move:
+                    print("Updating \(indexPaths.count) index paths")
+                    self.collectionView.reloadItemsAtIndexPaths(indexPaths)
+
                 default:
                     fatalError("Unexpected change type: \(changeType)")
                 }
@@ -343,6 +359,6 @@ class PhotoAlbumViewController: UIViewController,
     }
     
     private func getImageForPhoto(photo: Photo) -> UIImage? {
-        return UIImage(contentsOfFile: photo.path)
+        return UIImage(contentsOfFile: photo.localPath)
     }
 }

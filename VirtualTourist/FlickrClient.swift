@@ -16,7 +16,7 @@ public class FlickrClient {
         static let API_METHOD = "flickr.photos.search"
         static let FORMAT = "json"
         static let EXTRAS = "url_m"
-        static let MAX_PAGE = "50"
+        static let MAX_PAGE = "21"
     }
 
     private let session = NSURLSession.sharedSession()
@@ -30,18 +30,17 @@ public class FlickrClient {
     
     /// Given a latitude and longitude, attempt to download images from Flickr. Call the provided
     /// completion handler when done.
-    func downloadImagesForLocation(latitude: Double, longitude: Double, pageCount: Int, storagePath: NSURL, completion: (photos: [NSURL]?, pageCount: Int, error: NSError?) -> ()) {
-//    func downloadImagesForLocation(latitude: Double, longitude: Double, storagePath: NSURL, completion: (photos: [NSURL]?, error: NSError?) -> ()) {
-        if latitude < MIN_LATITUDE || latitude > MAX_LATITUDE || longitude < MIN_LONGITUDE || longitude > MAX_LONGITUDE {
+    func downloadImagesForLocation(pin: Pin, pageCount: Int, storagePath: NSURL, completion: (photos: [Photo]?, pageCount: Int, error: NSError?) -> ()) {
+        if pin.latitude < MIN_LATITUDE || pin.latitude > MAX_LATITUDE || pin.longitude < MIN_LONGITUDE || pin.longitude > MAX_LONGITUDE {
             print("Invalid latitude/longitude")
             let error = NSError(domain: "Invalid latitude/longitude", code: 100, userInfo: nil)
             completion(photos: nil, pageCount: pageCount, error: error)
         }
         
-        let boundingBox = createBoundingBox(latitude, longitude)
+        let boundingBox = createBoundingBox(pin.latitude, pin.longitude)
         print("Bounding box=\(boundingBox)")
         
-        let randomPage = "\(arc4random_uniform(UInt32(pageCount) + 1))"
+        let randomPage = "\(arc4random_uniform(UInt32(pin.pageCount) + 1) % 192)"
         let methodArguments = [
             "method": APIConstants.API_METHOD,
             "api_key": APIConstants.API_KEY,
@@ -53,7 +52,7 @@ public class FlickrClient {
             "page": randomPage
         ]
         
-        print("*** Using page count \(pageCount) and got random page \(randomPage)")
+        print("*** Using page count \(pin.pageCount) and got random page \(randomPage)")
         
         getImageFromFlickr(methodArguments) { (photosData, pageCount, error) -> () in
             if let error = error {
@@ -61,31 +60,55 @@ public class FlickrClient {
             } else {
                 print("Got \(photosData.count) photos")
                 
-                // Save the photos at the paths to `storagePath` and return an array of file paths
-                let photos = photosData.map({(photoData: [String: AnyObject]) -> NSURL in
-                    if let photoURL = photoData["url_m"] as? String,
-                       let data = NSData(contentsOfURL: NSURL(string: photoURL)!) {
-                        
+                // Save the photos at the paths to `storagePath` and return an array of remote URL
+                // file path tuples
+                let photos = photosData.map({(photoData: [String: AnyObject]) -> (NSURL, NSURL) in
+
+                    if let photoURL = NSURL(string: (photoData["url_m"] as? String)!) {
                         // Create the filename and write to storage
                         let filename = "\(NSDate().timeIntervalSince1970)-\(arc4random())"
                         if let fullPath = NSURL(string: filename, relativeToURL: storagePath) {
-                            // Download the photo on the global queue
-                            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
-                                if (!data.writeToURL(fullPath, atomically: false)) {
-                                    print("Failed to write to URL: \(fullPath)")
-                                }
-                            })
-                            
-                            return fullPath
+                            return (photoURL, fullPath)
                         } else {
                             print("Failed to create url for fullpath: \(filename) and \(storagePath)")
                         }
                     }
-                    
-                    return NSURL()
+
+                    return (NSURL(), NSURL())
                 })
+
+                var newPhotos = [Photo]()
                 
-                completion(photos: photos, pageCount: pageCount, error: nil)
+                // Download the photos on the global queue
+                for (remoteURL, localURL) in photos {
+                    let newPhoto = Photo(localPath: localURL.path!, remotePath: remoteURL.absoluteString, pin: pin, context: CoreDataManager.sharedInstance().managedObjectContext!)
+                    newPhotos.append(newPhoto)
+                    print("Downloading photo from \(newPhoto.remotePath) to \(newPhoto.localPath)")
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
+                        if let data = NSData(contentsOfURL: remoteURL) {
+                            if (!data.writeToURL(localURL, atomically: false)) {
+                                print("Failed to write to URL: \(localURL)")
+                            } else {
+                                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                    newPhoto.downloaded = true
+                                    do {
+                                        try CoreDataManager.sharedInstance().managedObjectContext!.save()
+                                    } catch {
+                                        print("Error saving context")
+                                    }
+                                })
+                            }
+                        }
+                    })
+                }
+                
+                do {
+                    try CoreDataManager.sharedInstance().managedObjectContext!.save()
+                } catch {
+                    print("Error saving context")
+                }
+
+                completion(photos: newPhotos, pageCount: pageCount, error: nil)
             }
         }
     }
@@ -104,7 +127,6 @@ public class FlickrClient {
                     let httpResponse = response as! NSHTTPURLResponse
                     print("status: \(httpResponse.statusCode)")
                     let parsedResult = (try! NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments)) as! [String: AnyObject]
-                    print(parsedResult)
                     
                     // Get the `photos` dictionary from the parsed response
                     let photos = parsedResult["photos"] as! [String: AnyObject]

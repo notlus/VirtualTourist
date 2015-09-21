@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="8191" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="U6F-Ps-MfK">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="8191" systemVersion="15A282b" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="U6F-Ps-MfK">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
@@ -20,6 +20,7 @@
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="sLc-Zr-ZxF">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <animations/>
                                 <gestureRecognizers/>
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="6Qg-ql-epX" appends="YES" id="nb1-sw-8b1"/>
@@ -27,6 +28,7 @@
                             </mapView>
                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap Pins to Delete" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Fin-PR-v77">
                                 <rect key="frame" x="0.0" y="545" width="600" height="55"/>
+                                <animations/>
                                 <color key="backgroundColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="55" id="odW-ip-yyb"/>
@@ -36,6 +38,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
+                        <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="sLc-Zr-ZxF" secondAttribute="bottom" id="2Fl-Ch-rdn"/>
@@ -84,6 +87,7 @@
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="P7k-fX-35e">
                                 <rect key="frame" x="0.0" y="174" width="600" height="380"/>
+                                <animations/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="73X-Is-h8m">
                                     <size key="itemSize" width="120" height="120"/>
@@ -103,9 +107,11 @@
                                                     <rect key="frame" x="5" y="5" width="110" height="110"/>
                                                     <subviews>
                                                         <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="Hpr-vG-Z4z">
-                                                            <rect key="frame" x="36.5" y="36.5" width="37" height="37"/>
+                                                            <rect key="frame" x="37" y="37" width="37" height="37"/>
+                                                            <animations/>
                                                         </activityIndicatorView>
                                                     </subviews>
+                                                    <animations/>
                                                     <color key="backgroundColor" red="0.32549019610000002" green="0.54117647059999996" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                     <constraints>
                                                         <constraint firstItem="Hpr-vG-Z4z" firstAttribute="centerX" secondItem="aZO-6e-Zpc" secondAttribute="centerX" id="3y2-vr-Sp2"/>
@@ -114,16 +120,19 @@
                                                         <constraint firstItem="Hpr-vG-Z4z" firstAttribute="centerY" secondItem="aZO-6e-Zpc" secondAttribute="centerY" id="n0J-bo-Hd6"/>
                                                     </constraints>
                                                 </view>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="f2f-Ks-cdM">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="f2f-Ks-cdM">
                                                     <rect key="frame" x="0.0" y="0.0" width="120" height="120"/>
+                                                    <animations/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="120" id="hKF-dr-eG6"/>
                                                         <constraint firstAttribute="width" constant="120" id="mTI-oS-rEX"/>
                                                     </constraints>
                                                 </imageView>
                                             </subviews>
+                                            <animations/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
+                                        <animations/>
                                         <constraints>
                                             <constraint firstItem="f2f-Ks-cdM" firstAttribute="centerY" secondItem="pZg-fj-KHm" secondAttribute="centerY" id="3f5-Uy-NvA"/>
                                             <constraint firstItem="aZO-6e-Zpc" firstAttribute="centerX" secondItem="pZg-fj-KHm" secondAttribute="centerX" id="XLZ-eO-Tcu"/>
@@ -144,9 +153,11 @@
                             </collectionView>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" zoomEnabled="NO" scrollEnabled="NO" rotateEnabled="NO" pitchEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zRA-6Q-6wS">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="176"/>
+                                <animations/>
                             </mapView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="This pin has no images." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sCm-HL-CCY">
                                 <rect key="frame" x="140" y="278" width="320" height="44"/>
+                                <animations/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="320" id="Iy2-c7-2d7"/>
                                     <constraint firstAttribute="height" constant="44" id="xel-3u-pEh"/>
@@ -157,6 +168,7 @@
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nOf-ki-1pj">
                                 <rect key="frame" x="0.0" y="553" width="600" height="47"/>
+                                <animations/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="47" id="oPk-Vq-qyY"/>
                                 </constraints>
@@ -166,6 +178,7 @@
                                 </connections>
                             </button>
                         </subviews>
+                        <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="tiA-FX-DU0" firstAttribute="top" secondItem="nOf-ki-1pj" secondAttribute="bottom" id="5ea-uT-Ybz"/>
@@ -212,6 +225,7 @@
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="ieg-PI-bMh">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <animations/>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
