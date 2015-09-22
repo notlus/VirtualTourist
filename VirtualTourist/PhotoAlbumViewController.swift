@@ -159,7 +159,7 @@ class PhotoAlbumViewController: UIViewController,
                 photoCell.photoView.hidden = false
                 photoCell.overlayView.hidden = true
                 photoCell.activityView.stopAnimating()
-                if let image = getImageForPhoto(photo) {
+                if let image = FlickrClient.sharedInstance.getLocalPhoto(photo) {
                     photoCell.photoView.image = image
                 }
             } else {
@@ -293,7 +293,6 @@ class PhotoAlbumViewController: UIViewController,
     }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        // TODO: Handle
         print("controllerDidChangeContent, changes count: \(self.objectChanges.count)")
         
         collectionView.performBatchUpdates({ () -> Void in
@@ -335,12 +334,8 @@ class PhotoAlbumViewController: UIViewController,
     
     // MARK:  Private Functions
     
-    private func getImageForPhoto(photo: Photo) -> UIImage? {
-        return UIImage(contentsOfFile: photo.localPath)
-    }
-
     private func downloadPhotos() -> Void {
-        FlickrClient.sharedInstance.downloadImagesForLocation(pin, pageCount: pin.pageCount, storagePath: appDelegate.photosPath) { (photos, pages, error) -> () in
+        FlickrClient.sharedInstance.downloadImagesForLocation(pin, pageCount: pin.pageCount) { (photos, pages, error) -> () in
             
             if let photos = photos {
                 

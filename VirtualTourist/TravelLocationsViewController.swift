@@ -151,7 +151,7 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     private func getPhotosForLocation(pin: Pin) {
         print("Downloading from Flickr")
             
-        FlickrClient.sharedInstance.downloadImagesForLocation(pin, pageCount: pin.pageCount, storagePath: self.appDelegate.photosPath) { (photos, pageCount, error) -> () in
+        FlickrClient.sharedInstance.downloadImagesForLocation(pin, pageCount: pin.pageCount) { (photos, pageCount, error) -> () in
             if let photos = photos {
                 // Store the updated page count with the pin
                 dispatch_async(dispatch_get_main_queue(), { () -> Void in

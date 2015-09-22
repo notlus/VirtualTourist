@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 public class FlickrClient {
     
@@ -19,6 +20,7 @@ public class FlickrClient {
         static let MAX_PAGE = "21"
     }
 
+    private let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     private let session = NSURLSession.sharedSession()
 
     private let MIN_LATITUDE    = -90.0
@@ -32,7 +34,7 @@ public class FlickrClient {
     
     /// Given a latitude and longitude, attempt to download images from Flickr. Call the provided
     /// completion handler when done.
-    func downloadImagesForLocation(pin: Pin, pageCount: Int, storagePath: NSURL, completion: (photos: [Photo]?, pageCount: Int, error: NSError?) -> ()) {
+    func downloadImagesForLocation(pin: Pin, pageCount: Int, completion: (photos: [Photo]?, pageCount: Int, error: NSError?) -> ()) {
         if pin.latitude < MIN_LATITUDE || pin.latitude > MAX_LATITUDE || pin.longitude < MIN_LONGITUDE || pin.longitude > MAX_LONGITUDE {
             print("Invalid latitude/longitude")
             let error = NSError(domain: "Invalid latitude/longitude", code: 100, userInfo: nil)
@@ -70,11 +72,7 @@ public class FlickrClient {
                     if let photoURL = NSURL(string: (photoData["url_m"] as? String)!) {
                         // Create the filename and write to storage
                         let filename = "\(NSDate().timeIntervalSince1970)-\(arc4random())"
-                        if let fullPath = NSURL(string: filename, relativeToURL: storagePath) {
-                            return (photoURL, fullPath)
-                        } else {
-                            print("Failed to create url for fullpath: \(filename) and \(storagePath)")
-                        }
+                            return (photoURL, NSURL(string: filename)!)
                     }
 
                     return (NSURL(), NSURL())
@@ -86,7 +84,6 @@ public class FlickrClient {
                 for (remoteURL, localURL) in photos {
                     let newPhoto = Photo(localPath: localURL.path!, remotePath: remoteURL.absoluteString, pin: pin, context: CoreDataManager.sharedInstance().managedObjectContext!)
                     newPhotos.append(newPhoto)
-                    print("Downloading photo from \(newPhoto.remotePath) to \(newPhoto.localPath)")
                     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
                         if let _ = self.downloadImageForPhoto(newPhoto) {
                             print("Downloaded photo from \(newPhoto.remotePath)")
@@ -122,16 +119,27 @@ public class FlickrClient {
         }
         
         if let data = NSData(contentsOfURL: remoteURL) {
-            if (!data.writeToFile(photo.localPath, atomically: true)) {
-                print("Failed to write to URL: \(photo.localPath)")
-                return nil
+            if let fullPath = NSURL(string: photo.localPath, relativeToURL: appDelegate.photosPath) {
+                if (!data.writeToURL(fullPath, atomically: true)) {
+                    print("Failed to write to URL: \(photo.localPath)")
+                    return nil
+                }
             }
             return data
         }
 
         return nil
     }
-    
+
+    func getLocalPhoto(photo: Photo) -> UIImage? {
+        guard let fullPath = NSURL(string: photo.localPath, relativeToURL: appDelegate.photosPath)  else {
+            print("Failed to create full path from \(photo.localPath) and \(appDelegate.photosPath)")
+            return nil
+        }
+
+        return UIImage(contentsOfFile: fullPath.path!)
+    }
+
     private func getImageFromFlickr(arguments: [String: String], completion: (photoPaths: [[String: AnyObject]], pageCount: Int, error: NSError?) -> ()) {
         
         // Create a URL from the arguments
