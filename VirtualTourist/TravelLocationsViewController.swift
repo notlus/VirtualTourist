@@ -33,20 +33,31 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     @IBAction func handleEdit(sender: UIBarButtonItem) {
         if !editing {
             navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Done, target: self, action: "handleEdit:")
-            deletePinsLabel.hidden = false
+            
+            UIView.animateWithDuration(0.25, delay: 0.0, options: .CurveEaseInOut, animations: {
+                self.deletePinsLabel.alpha = 1.0
+                self.mapView.frame.origin.y -= self.deletePinsLabel.frame.height
+            }, completion: { finished in
+                print("Done animating")
+            })
+            
             editing = true
         } else {
             navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Edit, target: self, action: "handleEdit:")
-            deletePinsLabel.hidden = true
-            if sharedContext.hasChanges {
-                do {
-                    try sharedContext.save()
-                } catch {
-                    fatalError("Error saving context")
-                }
-            } else {
-                print("*** No changes found ***")
+            
+            UIView.animateWithDuration(0.25, delay: 0.0, options: .CurveEaseInOut, animations: {
+                self.mapView.frame.origin.y += self.deletePinsLabel.frame.height
+                self.deletePinsLabel.alpha = 0.0
+            }, completion: { finished in
+                print("Done animating")
+            })
+            
+            do {
+                try sharedContext.save()
+            } catch {
+                fatalError("Error saving context")
             }
+            
             editing = false
         }
     }
@@ -126,13 +137,18 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         print("Downloading from Flickr")
             
         FlickrClient.sharedInstance.downloadImagesForLocation(pin, pageCount: pin.pageCount, storagePath: self.appDelegate.photosPath) { (photos, pageCount, error) -> () in
-            // Store the updated page count with the pin
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                pin.pageCount = pageCount
-                
-                CoreDataManager.sharedInstance().saveContext()
-                print("Saved \(photos!.count) photos")
-            })
+            if let photos = photos {
+                // Store the updated page count with the pin
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    pin.pageCount = pageCount
+                    
+                    CoreDataManager.sharedInstance().saveContext()
+                    print("Saved \(photos.count) photos")
+                })
+            }
+            else {
+                print("No photos found")
+            }
         }
     }
     
