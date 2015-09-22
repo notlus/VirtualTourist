@@ -16,7 +16,11 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     
     private let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
+    // Track the pin that was tapped
+    private var tappedPin: TravelLocationAnnotation?
 
+    private var ignoreRegionChanges = true
+    
     // MARK: Outlets
     
     @IBOutlet weak var deletePinsLabel: UILabel!
@@ -122,6 +126,17 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         }
     }
 
+    override func viewDidAppear(animated: Bool) {
+        // Don't ignore region changes after the view as appeared
+        ignoreRegionChanges = false
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        // Ignore region changes after the view has disappeared, so that when it is shown again
+        // we don't try to save region data
+        ignoreRegionChanges = true
+    }
+    
     private func addAnnotation(pin: Pin) {
         let annotation = TravelLocationAnnotation()
         annotation.locationPin = pin
@@ -185,8 +200,6 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         return v
     }
 
-    private var tappedPin: TravelLocationAnnotation?
-    
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         print("didSelectAnnotationView")
         
@@ -195,7 +208,6 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         }
         
         if editing == false {
-            saveRegion(mapView.region)
             mapView.deselectAnnotation(annotation, animated: false)
             tappedPin = annotation as? TravelLocationAnnotation
             performSegueWithIdentifier("ShowPhotoAlbumViewController", sender: self)
@@ -209,7 +221,11 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     }
     
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        saveRegion(mapView.region)
+        // Only save region information when `ignoreRegionChanges` is false. This prevents regions
+        // being saved when the map is first displayed
+        if !ignoreRegionChanges {
+            saveRegion(mapView.region)
+        }
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -226,8 +242,6 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
     // MARK: Load and save region data
     
     private func loadRegion() -> MKCoordinateRegion? {
-        print("Attempting to load region")
-        
         let defaults = NSUserDefaults.standardUserDefaults()
 
         // Load the span and center from NSUserDefaults
@@ -242,11 +256,13 @@ class TravelLocationsViewController: UIViewController, MKMapViewDelegate, UIGest
         
         let region = MKCoordinateRegionMake(center, span)
         
+        print("Loaded region: \(region)")
+        
         return region
     }
     
     private func saveRegion(region: MKCoordinateRegion) {
-        print("Saving region")
+        print("Saving region: \(region)")
         let defaults = NSUserDefaults.standardUserDefaults()
         
         let latitude = region.center.latitude
