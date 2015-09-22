@@ -13,7 +13,6 @@
 		3708542B1B9FA23200A54575 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 370854291B9FA23200A54575 /* Main.storyboard */; };
 		3708542D1B9FA23200A54575 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3708542C1B9FA23200A54575 /* Images.xcassets */; };
 		370854301B9FA23200A54575 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3708542E1B9FA23200A54575 /* LaunchScreen.xib */; };
-		3708543C1B9FA23200A54575 /* VirtualTouristTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3708543B1B9FA23200A54575 /* VirtualTouristTests.swift */; };
 		370854461B9FA2B800A54575 /* PhotoAlbumViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370854451B9FA2B800A54575 /* PhotoAlbumViewController.swift */; };
 		3708544A1B9FA4CC00A54575 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 370854491B9FA4CC00A54575 /* MapKit.framework */; };
 		3708545C1B9FB54700A54575 /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3708545B1B9FB54700A54575 /* Pin.swift */; };
@@ -22,19 +21,7 @@
 		37EC674E1BA6211600E52EC9 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37EC674D1BA6211600E52EC9 /* Photo.swift */; };
 		37EC67501BA624C000E52EC9 /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37EC674F1BA624C000E52EC9 /* CoreDataManager.swift */; };
 		37FA9F831BA734F0001E835A /* FlickrClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FA9F821BA734F0001E835A /* FlickrClient.swift */; };
-		37FA9F861BA73B3B001E835A /* FlickrClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FA9F851BA73B3B001E835A /* FlickrClientTests.swift */; };
-		37FA9F871BA73B61001E835A /* FlickrClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FA9F821BA734F0001E835A /* FlickrClient.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		370854361B9FA23200A54575 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 370854151B9FA23200A54575 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3708541C1B9FA23200A54575;
-			remoteInfo = VirtualTourist;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		3708541D1B9FA23200A54575 /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -45,7 +32,6 @@
 		3708542A1B9FA23200A54575 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		3708542C1B9FA23200A54575 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		3708542F1B9FA23200A54575 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		370854351B9FA23200A54575 /* VirtualTouristTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VirtualTouristTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3708543A1B9FA23200A54575 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3708543B1B9FA23200A54575 /* VirtualTouristTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTouristTests.swift; sourceTree = "<group>"; };
 		370854451B9FA2B800A54575 /* PhotoAlbumViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoAlbumViewController.swift; sourceTree = "<group>"; };
@@ -68,13 +54,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		370854321B9FA23200A54575 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -92,7 +71,6 @@
 			isa = PBXGroup;
 			children = (
 				3708541D1B9FA23200A54575 /* VirtualTourist.app */,
-				370854351B9FA23200A54575 /* VirtualTouristTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -180,24 +158,6 @@
 			productReference = 3708541D1B9FA23200A54575 /* VirtualTourist.app */;
 			productType = "com.apple.product-type.application";
 		};
-		370854341B9FA23200A54575 /* VirtualTouristTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 370854421B9FA23200A54575 /* Build configuration list for PBXNativeTarget "VirtualTouristTests" */;
-			buildPhases = (
-				370854311B9FA23200A54575 /* Sources */,
-				370854321B9FA23200A54575 /* Frameworks */,
-				370854331B9FA23200A54575 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				370854371B9FA23200A54575 /* PBXTargetDependency */,
-			);
-			name = VirtualTouristTests;
-			productName = VirtualTouristTests;
-			productReference = 370854351B9FA23200A54575 /* VirtualTouristTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -212,10 +172,6 @@
 					3708541C1B9FA23200A54575 = {
 						CreatedOnToolsVersion = 6.4;
 						DevelopmentTeam = ZLSZ3X3NKJ;
-					};
-					370854341B9FA23200A54575 = {
-						CreatedOnToolsVersion = 6.4;
-						TestTargetID = 3708541C1B9FA23200A54575;
 					};
 				};
 			};
@@ -233,7 +189,6 @@
 			projectRoot = "";
 			targets = (
 				3708541C1B9FA23200A54575 /* VirtualTourist */,
-				370854341B9FA23200A54575 /* VirtualTouristTests */,
 			);
 		};
 /* End PBXProject section */
@@ -246,13 +201,6 @@
 				3708542B1B9FA23200A54575 /* Main.storyboard in Resources */,
 				370854301B9FA23200A54575 /* LaunchScreen.xib in Resources */,
 				3708542D1B9FA23200A54575 /* Images.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		370854331B9FA23200A54575 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,25 +224,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		370854311B9FA23200A54575 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				37FA9F861BA73B3B001E835A /* FlickrClientTests.swift in Sources */,
-				3708543C1B9FA23200A54575 /* VirtualTouristTests.swift in Sources */,
-				37FA9F871BA73B61001E835A /* FlickrClient.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		370854371B9FA23200A54575 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3708541C1B9FA23200A54575 /* VirtualTourist */;
-			targetProxy = 370854361B9FA23200A54575 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		370854291B9FA23200A54575 /* Main.storyboard */ = {
@@ -426,42 +356,6 @@
 			};
 			name = Release;
 		};
-		370854431B9FA23200A54575 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = VirtualTouristTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.notlus.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VirtualTourist.app/VirtualTourist";
-			};
-			name = Debug;
-		};
-		370854441B9FA23200A54575 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = VirtualTouristTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.notlus.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VirtualTourist.app/VirtualTourist";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -479,15 +373,6 @@
 			buildConfigurations = (
 				370854401B9FA23200A54575 /* Debug */,
 				370854411B9FA23200A54575 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		370854421B9FA23200A54575 /* Build configuration list for PBXNativeTarget "VirtualTouristTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				370854431B9FA23200A54575 /* Debug */,
-				370854441B9FA23200A54575 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
