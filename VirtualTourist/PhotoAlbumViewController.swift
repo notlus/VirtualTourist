@@ -353,6 +353,13 @@ class PhotoAlbumViewController: UIViewController,
                     self.collectionButton.enabled = true
                     self.collectionView.reloadData()
                 })
+            } else {
+                // No photos found
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    self.noImagesLabel.hidden = false
+                    self.collectionView.hidden = true
+                    self.collectionButton.enabled = false
+                })
             }
         }
     }

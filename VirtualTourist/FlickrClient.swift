@@ -26,6 +26,8 @@ public class FlickrClient {
     private let MIN_LONGITUDE   = -180.0
     private let MAX_LONGITUDE   =  180.0
     
+    private static let NO_PHOTOS_FOUND = 1000
+    
     static let sharedInstance = FlickrClient()
     
     /// Given a latitude and longitude, attempt to download images from Flickr. Call the provided
@@ -57,6 +59,7 @@ public class FlickrClient {
         getImageFromFlickr(methodArguments) { (photosData, pageCount, error) -> () in
             if let error = error {
                 print("Received an error downloading photos: \(error)")
+                completion(photos: nil, pageCount: 0, error: error)
             } else {
                 print("Got \(photosData.count) photos")
                 
@@ -159,7 +162,7 @@ public class FlickrClient {
                         completion(photoPaths: photoArray, pageCount: lastPageCount, error: nil)
                     }
                     else {
-                        completion(photoPaths: [[String: AnyObject]](), pageCount: 0, error: NSError(domain: "FlickrClient", code: -1, userInfo: nil))
+                        completion(photoPaths: [[String: AnyObject]](), pageCount: 0, error: NSError(domain: "FlickrClient", code: FlickrClient.NO_PHOTOS_FOUND, userInfo: nil))
                     }
                 }
             }
