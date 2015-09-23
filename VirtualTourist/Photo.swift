@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 import CoreData
 
 @objc(Photo)
@@ -36,10 +37,16 @@ class Photo: NSManagedObject {
     }
     
     override func prepareForDeletion() {
-        do {
-            try NSFileManager.defaultManager().removeItemAtPath(localPath)
-        } catch {
-            print("Failed to delete \(localPath)")
+        // Build full path to the photo
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        if let fullPath = NSURL(string: localPath, relativeToURL: appDelegate.photosPath) {
+            do {
+                try NSFileManager.defaultManager().removeItemAtURL(fullPath)
+            } catch {
+                print("Failed to delete \(localPath)")
+            }
+        } else {
+            print("Failed to create full path to photo: \(localPath)")
         }
     }
 }
